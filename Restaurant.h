@@ -6,7 +6,7 @@
 #include "Scooter.h"
 #include "Table.h"
 #include "LinkedQueue.h"
-#include "PriQueue.h"
+#include "priQueue.h"
 #include "CookOrds.h"
 #include "random_generator.h"
 #include <iostream>

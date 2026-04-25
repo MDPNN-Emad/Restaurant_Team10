@@ -2,7 +2,7 @@
 #ifndef TABLE_QUEUE_H
 #define TABLE_QUEUE_H 
 
-#include "PriQueue.h"
+#include "priQueue.h"
 #include "Table.h"
 #include "Order.h"
 

@@ -1,0 +1,313 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
+
+PS D:\Senior Spring\Team10> claude
+╭─── Claude Code v2.1.119 ─────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                    │ Tips for getting started                                        │
+│                 Welcome back Hamo!                 │ Run /init to create a CLAUDE.md file with instructions for Cla… │
+│                                                    │ ─────────────────────────────────────────────────────────────── │
+│                       ▐▛███▜▌                      │ Recent activity                                                 │
+│                      ▝▜█████▛▘                     │ No recent activity                                              │
+│                        ▘▘ ▝▝                       │                                                                 │
+│  Sonnet 4.6 · Claude Pro ·                         │                                                                 │
+│  ahmed.elbahrawi03@eng-st.cu.edu.eg's Organization │                                                                 │
+│               D:\Senior Spring\Team10              │                                                                 │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+❯ This is a C++ university project (Data Structures & Algorithms course). It simulates a restaurant order management
+  system. We're working on Phase 1.2 fixes only — no new Phase 2 logic yet.
+  The project uses custom DS classes from labs: LinkedQueue, priQueue, ArrayStack. STL is not allowed. No global
+  variables. No friendship except where the spec explicitly says it's okay (e.g. operator<<).
+  The spec rule: "SHARE, MOVE, Don't Copy" — all lists hold pointers, never object copies.
+  We will fix issues one by one. I'll tell you which issue to fix. Only touch the files relevant to that fix. Don't
+  refactor anything I didn't ask about. In UI.h, change the cookingOrders parameter type from LinkedQueue<Order*>& to
+  priQueue<Order*>& so it matches the CookOrds member in Restaurant.h (CookOrds inherits from priQueue). Also update
+  the printFirstFew(cookingOrders, "Cooking") call inside printStatus — since priQueue needs the priority overload, add
+   a printFirstFewPri private helper in UI.h mirroring the one already in Restaurant.h, and call that one for
+  cookingOrders.
+
+● Let me read the relevant files before making any changes.
+
+  Read 2 files (ctrl+o to expand)
+
+● Now I have a clear picture. I need to make three changes in UI.h:
+  1. Add a printFirstFewPri private helper mirroring Restaurant.h's version
+  2. Change the cookingOrders parameter type in printStatus to priQueue<Order*>&
+  3. Swap the printFirstFew(cookingOrders, "Cooking") call to printFirstFewPri
+
+● Update(UI.h)
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Edit file
+ UI.h
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+ 35          cout << endl;
+ 36      }
+ 37
+ 38 +    void printFirstFewPri(priQueue<Order*>& q, const string& name) {
+ 39 +        cout << name << ": ";
+ 40 +        priQueue<Order*> shown;
+ 41 +        priQueue<Order*> rest;
+ 42 +        Order* o = nullptr;
+ 43 +        int p, count = 0;
+ 44 +
+ 45 +        while (count < 5 && q.dequeue(o, p)) {
+ 46 +            cout << o->get_id() << " ";
+ 47 +            shown.enqueue(o, p);
+ 48 +            ++count;
+ 49 +        }
+ 50 +        while (q.dequeue(o, p)) rest.enqueue(o, p);
+ 51 +
+ 52 +        while (shown.dequeue(o, p)) q.enqueue(o, p);
+ 53 +        while (rest.dequeue(o, p))  q.enqueue(o, p);
+ 54 +
+ 55 +        if (count == 0) cout << "(empty)";
+ 56 +        cout << endl;
+ 57 +    }
+ 58 +
+ 59  public:
+ 60      void printStatus(
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+ Do you want to make this edit to UI.h?
+ ❯ 1. Yes
+   2. Yes, allow all edits during this session (shift+tab)
+   3. No
+
+ Esc to cancel · Tab to amend
+  system. We're working on Phase 1.2 fixes only — no new Phase 2 logic yet.
+  The project uses custom DS classes from labs: LinkedQueue, priQueue, ArrayStack. STL is not allowed. No global
+  variables. No friendship except where the spec explicitly says it's okay (e.g. operator<<).
+  The spec rule: "SHARE, MOVE, Don't Copy" — all lists hold pointers, never object copies.
+  We will fix issues one by one. I'll tell you which issue to fix. Only touch the files relevant to that fix. Don't
+  refactor anything I didn't ask about. In UI.h, change the cookingOrders parameter type from LinkedQueue<Order*>& to
+  priQueue<Order*>& so it matches the CookOrds member in Restaurant.h (CookOrds inherits from priQueue). Also update
+  the printFirstFew(cookingOrders, "Cooking") call inside printStatus — since priQueue needs the priority overload, add
+   a printFirstFewPri private helper in UI.h mirroring the one already in Restaurant.h, and call that one for
+  cookingOrders.
+
+● Let me read the relevant files before making any changes.
+
+  Read 2 files (ctrl+o to expand)
+
+● Now I have a clear picture. I need to make three changes in UI.h:
+  1. Add a printFirstFewPri private helper mirroring Restaurant.h's version
+  2. Change the cookingOrders parameter type in printStatus to priQueue<Order*>&
+  3. Swap the printFirstFew(cookingOrders, "Cooking") call to printFirstFewPri
+
+● Update(UI.h)
+  ⎿  Added 21 lines
+      35          cout << endl;
+      36      }
+      37
+      38 +    void printFirstFewPri(priQueue<Order*>& q, const string& name) {
+      39 +        cout << name << ": ";
+      40 +        priQueue<Order*> shown;
+      41 +        priQueue<Order*> rest;
+      42 +        Order* o = nullptr;
+      43 +        int p, count = 0;
+      44 +
+      45 +        while (count < 5 && q.dequeue(o, p)) {
+      46 +            cout << o->get_id() << " ";
+      47 +            shown.enqueue(o, p);
+      48 +            ++count;
+      49 +        }
+      50 +        while (q.dequeue(o, p)) rest.enqueue(o, p);
+      51 +
+      52 +        while (shown.dequeue(o, p)) q.enqueue(o, p);
+      53 +        while (rest.dequeue(o, p))  q.enqueue(o, p);
+      54 +
+      55 +        if (count == 0) cout << "(empty)";
+      56 +        cout << endl;
+      57 +    }
+      58 +
+      59  public:
+      60      void printStatus(
+      61          int currentTime,
+
+● Update(UI.h)
+  ⎿  Added 1 line, removed 1 line
+      71          LinkedQueue<Chef*>&    freeCN,
+      72          LinkedQueue<Chef*>&    freeCS,
+      73          LinkedQueue<Chef*>&    busyChefs,
+      74 -        LinkedQueue<Order*>&   cookingOrders,
+      74 +        priQueue<Order*>&      cookingOrders,
+      75          LinkedQueue<Order*>&   readyOD,
+      76          LinkedQueue<Order*>&   readyOT,
+      77          LinkedQueue<Order*>&   readyOV,
+
+● Update(UI.h)
+  ⎿  Added 1 line, removed 1 line
+      108
+      109          cout << "\n--- Sample IDs ---\n";
+      110          printFirstFew(pendingODG,     "ODG pending");
+      111 -        printFirstFew(cookingOrders,  "Cooking");
+      111 +        printFirstFewPri(cookingOrders,  "Cooking");
+      112          printFirstFew(readyOT,        "Ready OT");
+      113          printFirstFew(finishedOrders, "Finished");
+      114      }
+
+● Three changes applied to UI.h:
+  - Added printFirstFewPri(priQueue<Order*>&, const string&) as a private helper — exact mirror of the one in
+  Restaurant.h
+  - Changed cookingOrders parameter in printStatus from LinkedQueue<Order*>& to priQueue<Order*>&
+  - Swapped printFirstFew(cookingOrders, "Cooking") → printFirstFewPri(cookingOrders, "Cooking")
+
+✻ Cogitated for 44s
+
+❯ In Restaurant_Team10.vcxproj and Restaurant_Team10.vcxproj.filters, replace the three stale ClInclude entries:
+  cheff.h → Chef.h, PendyOVC.h → PendOVC.h, Restuarant.h → Restaurant.h. Keep all other entries unchanged.
+
+● Let me read both files first.
+
+  Read 2 files (ctrl+o to expand)
+
+● Six replacements needed — three per file. Making all six in parallel.
+
+● Update(Restaurant_Team10.vcxproj)
+  ⎿  Added 1 line, removed 1 line
+      131    </ItemGroup>
+      132    <ItemGroup>
+      133      <ClInclude Include="ArrayStack.h" />
+      134 -    <ClInclude Include="cheff.h" />
+      134 +    <ClInclude Include="Chef.h" />
+      135      <ClInclude Include="CookOrds.h" />
+      136      <ClInclude Include="LinkedQueue.h" />
+      137      <ClInclude Include="Node.h" />
+
+● Update(Restaurant_Team10.vcxproj.filters)
+  ⎿  Added 1 line, removed 1 line
+      23      <ClInclude Include="StackADT.h">
+      24        <Filter>Header Files</Filter>
+      25      </ClInclude>
+      26 -    <ClInclude Include="cheff.h">
+      26 +    <ClInclude Include="Chef.h">
+      27        <Filter>Header Files</Filter>
+      28      </ClInclude>
+      29      <ClInclude Include="Order.h">
+
+● Update(Restaurant_Team10.vcxproj)
+  ⎿  Added 1 line, removed 1 line
+      136      <ClInclude Include="LinkedQueue.h" />
+      137      <ClInclude Include="Node.h" />
+      138      <ClInclude Include="Order.h" />
+      139 -    <ClInclude Include="PendyOVC.h" />
+      139 +    <ClInclude Include="PendOVC.h" />
+      140      <ClInclude Include="priNode.h" />
+      141      <ClInclude Include="priQueue.h" />
+      142      <ClInclude Include="QueueADT.h" />
+
+● Update(Restaurant_Team10.vcxproj.filters)
+  ⎿  Added 1 line, removed 1 line
+      65      <ClInclude Include="CookOrds.h">
+      66        <Filter>Header Files</Filter>
+      67      </ClInclude>
+      68 -    <ClInclude Include="PendyOVC.h">
+      68 +    <ClInclude Include="PendOVC.h">
+      69        <Filter>Header Files</Filter>
+      70      </ClInclude>
+      71      <ClInclude Include="RdyOV.h">
+
+● Update(Restaurant_Team10.vcxproj)
+  ⎿  Added 1 line, removed 1 line
+      142      <ClInclude Include="QueueADT.h" />
+      143      <ClInclude Include="random_generator.h" />
+      144      <ClInclude Include="RdyOV.h" />
+      145 -    <ClInclude Include="Restuarant.h" />
+      145 +    <ClInclude Include="Restaurant.h" />
+      146      <ClInclude Include="Scooter.h" />
+      147      <ClInclude Include="StackADT.h" />
+      148      <ClInclude Include="Table.h" />
+
+● Update(Restaurant_Team10.vcxproj.filters)
+  ⎿  Added 1 line, removed 1 line
+      59      <ClInclude Include="UI.h">
+      60        <Filter>Header Files</Filter>
+      61      </ClInclude>
+      62 -    <ClInclude Include="Restuarant.h">
+      62 +    <ClInclude Include="Restaurant.h">
+      63        <Filter>Header Files</Filter>
+      64      </ClInclude>
+      65      <ClInclude Include="CookOrds.h">
+
+● All six entries updated in both files: cheff.h → Chef.h, PendyOVC.h → PendOVC.h, Restuarant.h → Restaurant.h.
+  Everything else untouched.
+
+❯  Verify build (no code changes needed)
+
+  Don't edit anything. Just confirm by reading the files that all #include directives across the codebase reference
+  filenames that actually exist on disk. Report any mismatches.
+
+● Explore(Verify all #include references exist on disk)
+  ⎿  Done (5 tool uses · 23.0k tokens · 20s)
+  (ctrl+o to expand)
+
+● All 32 local includes checked. One recurring mismatch found:
+
+  PriQueue.h vs priQueue.h (capital P vs lowercase p)
+
+  ┌──────────────┬──────┬───────────────────────┬─────────────────┐
+  │     File     │ Line │      Written as       │ Actual filename │
+  ├──────────────┼──────┼───────────────────────┼─────────────────┤
+  │ CookOrds.h   │ 5    │ #include "PriQueue.h" │ priQueue.h      │
+  ├──────────────┼──────┼───────────────────────┼─────────────────┤
+  │ Restaurant.h │ 9    │ #include "PriQueue.h" │ priQueue.h      │
+  ├──────────────┼──────┼───────────────────────┼─────────────────┤
+  │ TableQueue.h │ 5    │ #include "PriQueue.h" │ priQueue.h      │
+  └──────────────┴──────┴───────────────────────┴─────────────────┘
+
+  Windows's filesystem is case-insensitive, so this builds locally without error. However, the MSVC compiler itself is
+  case-sensitive on include paths when using certain settings, and it would break on any Linux/GCC build. The three
+  files above should consistently use "priQueue.h" to match the file on disk. All other 29 includes are correct.
+
+✻ Cogitated for 37s
+
+❯ change all of them to "priQueue.h" but don't change file name on disk
+
+● Reading all three files before editing.
+
+  Read 3 files (ctrl+o to expand)
+
+● All three confirmed. Editing in parallel.
+
+● Update(CookOrds.h)
+  ⎿  Added 1 line, removed 1 line
+      2  #ifndef COOK_ORDS_H
+      3  #define COOK_ORDS_H
+      4
+      5 -#include "PriQueue.h"
+      5 +#include "priQueue.h"
+      6  #include "Order.h"
+      7
+      8  class CookOrds : public priQueue<Order*> {
+
+● Update(Restaurant.h)
+  ⎿  Added 1 line, removed 1 line
+       6  #include "Scooter.h"
+       7  #include "Table.h"
+       8  #include "LinkedQueue.h"
+       9 -#include "PriQueue.h"
+       9 +#include "priQueue.h"
+      10  #include "CookOrds.h"
+      11  #include "random_generator.h"
+      12  #include <iostream>
+
+● Update(TableQueue.h)
+  ⎿  Added 1 line, removed 1 line
+      2  #ifndef TABLE_QUEUE_H
+      3  #define TABLE_QUEUE_H
+      4
+      5 -#include "PriQueue.h"
+      5 +#include "priQueue.h"
+      6  #include "Table.h"
+      7  #include "Order.h"
+      8
+
+● Done. All three #include "PriQueue.h" directives updated to #include "priQueue.h" in CookOrds.h, Restaurant.h, and
+  TableQueue.h. Disk filename unchanged.
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯ 
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  ⏵⏵ accept edits on (shift+tab to cycle)

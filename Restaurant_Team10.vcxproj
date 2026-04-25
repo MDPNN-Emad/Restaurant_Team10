@@ -131,18 +131,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrayStack.h" />
-    <ClInclude Include="cheff.h" />
+    <ClInclude Include="Chef.h" />
     <ClInclude Include="CookOrds.h" />
     <ClInclude Include="LinkedQueue.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="Order.h" />
-    <ClInclude Include="PendyOVC.h" />
+    <ClInclude Include="PendOVC.h" />
     <ClInclude Include="priNode.h" />
     <ClInclude Include="priQueue.h" />
     <ClInclude Include="QueueADT.h" />
     <ClInclude Include="random_generator.h" />
     <ClInclude Include="RdyOV.h" />
-    <ClInclude Include="Restuarant.h" />
+    <ClInclude Include="Restaurant.h" />
     <ClInclude Include="Scooter.h" />
     <ClInclude Include="StackADT.h" />
     <ClInclude Include="Table.h" />

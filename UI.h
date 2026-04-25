@@ -35,6 +35,27 @@ private:
         cout << endl;
     }
 
+    void printFirstFewPri(priQueue<Order*>& q, const string& name) {
+        cout << name << ": ";
+        priQueue<Order*> shown;
+        priQueue<Order*> rest;
+        Order* o = nullptr;
+        int p, count = 0;
+
+        while (count < 5 && q.dequeue(o, p)) {
+            cout << o->get_id() << " ";
+            shown.enqueue(o, p);
+            ++count;
+        }
+        while (q.dequeue(o, p)) rest.enqueue(o, p);
+
+        while (shown.dequeue(o, p)) q.enqueue(o, p);
+        while (rest.dequeue(o, p))  q.enqueue(o, p);
+
+        if (count == 0) cout << "(empty)";
+        cout << endl;
+    }
+
 public:
     void printStatus(
         int currentTime,
@@ -50,7 +71,7 @@ public:
         LinkedQueue<Chef*>&    freeCN,
         LinkedQueue<Chef*>&    freeCS,
         LinkedQueue<Chef*>&    busyChefs,
-        LinkedQueue<Order*>&   cookingOrders,
+        priQueue<Order*>&      cookingOrders,
         LinkedQueue<Order*>&   readyOD,
         LinkedQueue<Order*>&   readyOT,
         LinkedQueue<Order*>&   readyOV,
@@ -87,7 +108,7 @@ public:
 
         cout << "\n--- Sample IDs ---\n";
         printFirstFew(pendingODG,     "ODG pending");
-        printFirstFew(cookingOrders,  "Cooking");
+        printFirstFewPri(cookingOrders,  "Cooking");
         printFirstFew(readyOT,        "Ready OT");
         printFirstFew(finishedOrders, "Finished");
     }

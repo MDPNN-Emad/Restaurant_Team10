@@ -2,7 +2,7 @@
 #ifndef COOK_ORDS_H
 #define COOK_ORDS_H
 
-#include "PriQueue.h"
+#include "priQueue.h"
 #include "Order.h"
 
 class CookOrds : public priQueue<Order*> {

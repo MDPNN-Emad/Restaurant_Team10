@@ -23,7 +23,7 @@
     <ClInclude Include="StackADT.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cheff.h">
+    <ClInclude Include="Chef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Order.h">
@@ -59,13 +59,13 @@
     <ClInclude Include="UI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Restuarant.h">
+    <ClInclude Include="Restaurant.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CookOrds.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PendyOVC.h">
+    <ClInclude Include="PendOVC.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RdyOV.h">
