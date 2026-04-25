@@ -32,6 +32,9 @@ public:
         remaining_dishes = 0;
     }
 
+    Chef(const Chef&) = delete;
+    Chef& operator=(const Chef&) = delete;
+
     // Getters
     int get_id() const { return id; }
     string get_specialization() const { return specialization; }

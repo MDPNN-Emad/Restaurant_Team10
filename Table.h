@@ -23,6 +23,9 @@ public:
     }
 
   
+    Table(const Table&) = delete;
+    Table& operator=(const Table&) = delete;
+
     int getID() const { return id; }
     int getCapacity() const { return capacity; }
     int getOccupiedSeats() const { return occupiedSeats; }

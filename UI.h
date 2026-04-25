@@ -1,247 +1,131 @@
-﻿#ifndef RESTAURANT_H
-#define RESTAURANT_H
+#ifndef UI_H
+#define UI_H
 
 #include "Order.h"
 #include "Chef.h"
-#include "Scooter.h"
 #include "Table.h"
+#include "Scooter.h"
 #include "LinkedQueue.h"
-#include "PriQueue.h"
-#include "RandomGenerator.h"
-#include "UI.h"
+#include "priQueue.h"
 #include <iostream>
-#include <cstdlib>
-#include <ctime>
+#include <string>
 using namespace std;
 
-class Restaurant {
+class UI {
 private:
-    // Pending orders
-    LinkedQueue<Order*> pending_odg;
-    LinkedQueue<Order*> pending_odn;
-    LinkedQueue<Order*> pending_ot;
-    LinkedQueue<Order*> pending_ovn;
-    LinkedQueue<Order*> pending_ovc;
-    priQueue<Order*> pending_ovg;
+    void printFirstFew(LinkedQueue<Order*>& q, const string& name) {
+        cout << name << ": ";
+        LinkedQueue<Order*> shown;
+        LinkedQueue<Order*> rest;
+        Order* o = nullptr;
+        int count = 0;
 
-    // Cooking and ready
-    LinkedQueue<Order*> cooking_orders;
-    LinkedQueue<Order*> ready_od;
-    LinkedQueue<Order*> ready_ot;
-    LinkedQueue<Order*> ready_ov;
+        while (count < 5 && q.dequeue(o)) {
+            cout << o->get_id() << " ";
+            shown.enqueue(o);
+            ++count;
+        }
+        while (q.dequeue(o)) rest.enqueue(o);
 
-    // Completed
-    LinkedQueue<Order*> finished_orders;
-    LinkedQueue<Order*> cancelled_orders;
+        // restore original order: shown items first, then the rest
+        while (shown.dequeue(o)) q.enqueue(o);
+        while (rest.dequeue(o))  q.enqueue(o);
 
-    // Resources
-    LinkedQueue<Chef*> free_cn;
-    LinkedQueue<Chef*> free_cs;
-    LinkedQueue<Chef*> busy_chefs;
-    LinkedQueue<Scooter*> free_scooters;
-    LinkedQueue<Table*> free_tables;
-
-    // Stats
-    int finished_count;
-    int cancelled_count;
-    int total_orders;
-    int current_time;
-
-    UI ui;
+        if (count == 0) cout << "(empty)";
+        cout << endl;
+    }
 
 public:
-    Restaurant() : finished_count(0), cancelled_count(0), total_orders(500), current_time(0) {
-        srand(time(nullptr));
+    void printStatus(
+        int currentTime,
+        int finishedCount,
+        int cancelledCount,
+        int totalOrders,
+        LinkedQueue<Order*>&   pendingODG,
+        LinkedQueue<Order*>&   pendingODN,
+        LinkedQueue<Order*>&   pendingOT,
+        LinkedQueue<Order*>&   pendingOVN,
+        LinkedQueue<Order*>&   pendingOVC,
+        priQueue<Order*>&      pendingOVG,
+        LinkedQueue<Chef*>&    freeCN,
+        LinkedQueue<Chef*>&    freeCS,
+        LinkedQueue<Chef*>&    busyChefs,
+        LinkedQueue<Order*>&   cookingOrders,
+        LinkedQueue<Order*>&   readyOD,
+        LinkedQueue<Order*>&   readyOT,
+        LinkedQueue<Order*>&   readyOV,
+        LinkedQueue<Table*>&   freeTables,
+        LinkedQueue<Scooter*>& freeScooters,
+        LinkedQueue<Order*>&   finishedOrders,
+        LinkedQueue<Order*>&   cancelledOrders
+    ) {
+        cout << "\n========== TIME " << currentTime << " ==========" << '\n';
+        cout << "Finished: " << finishedCount
+             << " | Cancelled: " << cancelledCount
+             << " | Left: " << (totalOrders - finishedCount - cancelledCount)
+             << '\n' << '\n';
 
-        // Create resources
-        for (int i = 1; i <= 10; i++) free_cn.enqueue(new Chef(i, "CN", 3));
-        for (int i = 11; i <= 15; i++) free_cs.enqueue(new Chef(i, "CS", 5));
-        for (int i = 1; i <= 10; i++) free_tables.enqueue(new Table(i, rand() % 5 + 2));
-        for (int i = 1; i <= 8; i++) free_scooters.enqueue(new Scooter(i, 50, 8, 5));
+        cout << "Pending Orders:\n";
+        cout << "  ODG: " << pendingODG.getCount()
+             << " | ODN: " << pendingODN.getCount()
+             << " | OT: "  << pendingOT.getCount()  << '\n';
+        cout << "  OVN: " << pendingOVN.getCount()
+             << " | OVC: " << pendingOVC.getCount()
+             << " | OVG: " << pendingOVG.getCount() << '\n';
 
-        // Generate orders
-        RandomGenerator rng;
-        for (int i = 1; i <= 500; i++) {
-            Order* order = rng.generate_random_order(i, rand() % 100);
-            string type = order->get_type();
+        cout << "\nChefs: Free CN=" << freeCN.getCount()
+             << " | Free CS=" << freeCS.getCount()
+             << " | Busy=" << busyChefs.getCount() << '\n';
 
-            if (type == "ODG") pending_odg.enqueue(order);
-            else if (type == "ODN") pending_odn.enqueue(order);
-            else if (type == "OT") pending_ot.enqueue(order);
-            else if (type == "OVN") pending_ovn.enqueue(order);
-            else if (type == "OVC") pending_ovc.enqueue(order);
-            else if (type == "OVG") pending_ovg.enqueue(order, rand() % 10);
-        }
+        cout << "Cooking Orders: " << cookingOrders.getCount() << '\n';
+        cout << "Ready: OD=" << readyOD.getCount()
+             << " | OT=" << readyOT.getCount()
+             << " | OV=" << readyOV.getCount() << '\n';
+
+        cout << "Free Tables: " << freeTables.getCount()
+             << " | Free Scooters: " << freeScooters.getCount() << '\n';
+
+        cout << "\n--- Sample IDs ---\n";
+        printFirstFew(pendingODG,     "ODG pending");
+        printFirstFew(cookingOrders,  "Cooking");
+        printFirstFew(readyOT,        "Ready OT");
+        printFirstFew(finishedOrders, "Finished");
     }
 
-    void simulate() {
-        while ((finished_count + cancelled_count) < total_orders && current_time < 200) {
-
-            // Chefs work and finish orders
-            Chef* chef;
-            LinkedQueue<Chef*> temp_chefs;
-
-            while (busy_chefs.dequeue(chef)) {
-                chef->working();
-
-                if (chef->is_finished()) {
-                    Order* done = chef->get_current_order();
-                    string type = done->get_type();
-
-                    // Move from cooking to ready
-                    removeFromCooking(done->get_id());
-
-                    if (type == "OT") ready_ot.enqueue(done);
-                    else if (type == "ODG" || type == "ODN") ready_od.enqueue(done);
-                    else ready_ov.enqueue(done);
-
-                    // Free chef
-                    if (chef->get_specialization() == "CS") free_cs.enqueue(chef);
-                    else free_cn.enqueue(chef);
-                }
-                else {
-                    temp_chefs.enqueue(chef);
-                }
-            }
-
-            while (temp_chefs.dequeue(chef)) {
-                busy_chefs.enqueue(chef);
-            }
-
-            // Assigned left pending to chefs 30 times
-            for (int i = 0; i < 30; i++) {
-                Order* order = nullptr;
-                int choice = rand() % 6;
-
-                if (choice == 0) pending_odg.dequeue(order);
-                else if (choice == 1) pending_odn.dequeue(order);
-                else if (choice == 2) pending_ot.dequeue(order);
-                else if (choice == 3) pending_ovn.dequeue(order);
-                else if (choice == 4) pending_ovc.dequeue(order);
-                else {
-                    int p;
-                    pending_ovg.dequeue(order, p);
-                }
-
-                if (order != nullptr) {
-                    Chef* chef_assigned = nullptr;
-                    string type = order->get_type();
-
-                    if (type == "ODG" || type == "OVG") {
-                        if (free_cs.dequeue(chef_assigned)) {
-                            chef_assigned->assign_order(order);
-                            busy_chefs.enqueue(chef_assigned);
-                            cooking_orders.enqueue(order);
-                        }
-                        else {
-                            if (type == "ODG") pending_odg.enqueue(order);
-                            else pending_ovg.enqueue(order, rand() % 10);
-                        }
-                    }
-                    else {
-                        if (free_cn.dequeue(chef_assigned)) {
-                            chef_assigned->assign_order(order);
-                            busy_chefs.enqueue(chef_assigned);
-                            cooking_orders.enqueue(order);
-                        }
-                        else if (free_cs.dequeue(chef_assigned)) {
-                            chef_assigned->assign_order(order);
-                            busy_chefs.enqueue(chef_assigned);
-                            cooking_orders.enqueue(order);
-                        }
-                        else {
-                            if (type == "ODN") pending_odn.enqueue(order);
-                            else if (type == "OT") pending_ot.enqueue(order);
-                            else if (type == "OVC") pending_ovc.enqueue(order);
-                            else pending_ovn.enqueue(order);
-                        }
-                    }
-                }
-            }
-
-            // take ready orders
-            Order* ready;
-
-            
-            while (ready_ot.dequeue(ready)) {
-                finished_orders.enqueue(ready);
-                finished_count++;
-            }
-
-            //resources: (mazen)
-
-            // Dine-in  needs table
-            Table* table;
-            while (ready_od.dequeue(ready)) {
-                if (free_tables.dequeue(table)) {
-                    finished_orders.enqueue(ready);
-                    finished_count++;
-                    free_tables.enqueue(table);
-                }
-                else {
-                    ready_od.enqueue(ready);
-                    break;
-                }
-            }
-
-            // Delivery needs scooter
-            Scooter* scooter;
-            while (ready_ov.dequeue(ready)) {
-                if (free_scooters.dequeue(scooter)) {
-                    finished_orders.enqueue(ready);
-                    finished_count++;
-                    free_scooters.enqueue(scooter);
-                }
-                else {
-                    ready_ov.enqueue(ready);
-                    break;
-                }
-            }
-
-            // Random 10% 
-            if (rand() % 100 < 10) {
-                Order* cancelled = nullptr;
-                if (pending_ovc.dequeue(cancelled)) {
-                    cancelled_orders.enqueue(cancelled);
-                    cancelled_count++;
-                }
-            }
-
-            // Print
-            ui.printStatus(
-                current_time, finished_count, cancelled_count, total_orders,
-                pending_odg, pending_odn, pending_ot, pending_ovn, pending_ovc, pending_ovg,
-                free_cn, free_cs, busy_chefs,
-                cooking_orders,
-                ready_od, ready_ot, ready_ov,
-                free_tables, free_scooters,
-                finished_orders, cancelled_orders
-            );
-
-            current_time++;
-
-            cout << "Press Enter...";
-            cin.get();
+    int readMode() {
+        int mode = 0;
+        while (mode != 1 && mode != 2) {
+            cout << "Select mode:\n"
+                 << "  1 - Interactive (step by step)\n"
+                 << "  2 - Silent (run to end)\n"
+                 << "Choice: ";
+            cin >> mode;
+            if (mode != 1 && mode != 2)
+                cout << "Invalid. Enter 1 or 2.\n";
         }
-
-        cout << "\n========== DONE! ==========\n";
-        cout << "Simulation finished at time " << current_time << endl;
-        cout << "Finished: " << finished_count << " | Cancelled: " << cancelled_count << endl;
+        cin.ignore();
+        return mode;
     }
 
-    void removeFromCooking(int order_id) {
-        LinkedQueue<Order*> temp;
-        Order* o;
+    string readInputFileName() {
+        string name;
+        cout << "Enter input file name: ";
+        cin >> name;
+        cin.ignore();
+        return name;
+    }
 
-        while (cooking_orders.dequeue(o)) {
-            if (o->get_id() != order_id) {
-                temp.enqueue(o);
-            }
-        }
+    string readOutputFileName() {
+        string name;
+        cout << "Enter output file name: ";
+        cin >> name;
+        cin.ignore();
+        return name;
+    }
 
-        while (temp.dequeue(o)) {
-            cooking_orders.enqueue(o);
-        }
+    void pressAnyKey() {
+        cout << "\nPress Enter for next timestep...";
+        cin.get();
     }
 };
 

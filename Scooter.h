@@ -24,6 +24,9 @@ public:
         : id(id), speed(speed), Main_Dur(Main_Dur), Main_Ords(Main_Ords), totalDistanceTraveled(0),
         inMaintenance(false), maintenanceRemaining(0), ordersServed(0), isAvailable(true) { } 
 
+    Scooter(const Scooter&) = delete;
+    Scooter& operator=(const Scooter&) = delete;
+
     // Getters
     int getID() const { return id; }
     int getSpeed() const { return speed; }

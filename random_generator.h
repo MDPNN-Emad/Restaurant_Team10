@@ -3,7 +3,7 @@
 
 #include "Order.h"
 #include "LinkedQueue.h"
-#include"cheff.h"
+#include "Chef.h"
 
 #include <cstdlib>
 #include <ctime>
@@ -78,7 +78,7 @@ public:
         else if (order_type == "ODG" || order_type == "ODN") {
             int num_seats = get_random(1, 8);           
             int duration = get_random(10, 60);          
-            bool shareable = get_random(1, 100); 
+            bool shareable = (get_random(1, 100) > 50);
             return new Order(order_id, order_type, request_time,
                 order_size, order_price, num_seats, duration, shareable);
         }

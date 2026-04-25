@@ -2,11 +2,12 @@
 #define RESTAURANT_H
 
 #include "Order.h"
-#include "Cheff.h"
+#include "Chef.h"
 #include "Scooter.h"
 #include "Table.h"
 #include "LinkedQueue.h"
 #include "PriQueue.h"
+#include "CookOrds.h"
 #include "random_generator.h"
 #include <iostream>
 #include <cstdlib>
@@ -24,7 +25,7 @@ private:
     priQueue<Order*> pendingOVG;
 
     // orders in progress / ready
-    LinkedQueue<Order*> cookingOrders;
+    CookOrds cookingOrders;
     LinkedQueue<Order*> readyOD; // dine-in
     LinkedQueue<Order*> readyOT; // takeaway
     LinkedQueue<Order*> readyOV; // delivery
@@ -75,6 +76,39 @@ public:
         }
     }
 
+    ~Restaurant() {
+        Order* o; int p;
+
+        // pending orders
+        while (pendingODG.dequeue(o))    delete o;
+        while (pendingODN.dequeue(o))    delete o;
+        while (pendingOT.dequeue(o))     delete o;
+        while (pendingOVN.dequeue(o))    delete o;
+        while (pendingOVC.dequeue(o))    delete o;
+        while (pendingOVG.dequeue(o, p)) delete o;
+
+        // in-flight and completed orders
+        while (cookingOrders.dequeue(o, p)) delete o;
+        while (readyOD.dequeue(o))       delete o;
+        while (readyOT.dequeue(o))       delete o;
+        while (readyOV.dequeue(o))       delete o;
+        while (finishedOrders.dequeue(o))  delete o;
+        while (cancelledOrders.dequeue(o)) delete o;
+
+        // chefs
+        Chef* c;
+        while (freeCN.dequeue(c))    delete c;
+        while (freeCS.dequeue(c))    delete c;
+        while (busyChefs.dequeue(c)) delete c;
+
+        // resources
+        Scooter* s;
+        while (freeScooters.dequeue(s)) delete s;
+
+        Table* t;
+        while (freeTables.dequeue(t)) delete t;
+    }
+
     void printStatus() {
         cout << "\n========== TIME " << currentTime << " ==========" << '\n';
         cout << "Finished: " << finishedCount << " | Cancelled: " << cancelledCount
@@ -94,7 +128,7 @@ public:
              << " | Free CS=" << getChefCount(freeCS)
              << " | Busy=" << getChefCount(busyChefs) << '\n';
 
-        cout << "Cooking Orders: " << getCount(cookingOrders) << '\n';
+        cout << "Cooking Orders: " << cookingOrders.getCount() << '\n';
         cout << "Ready: OD=" << getCount(readyOD)
              << " | OT=" << getCount(readyOT)
              << " | OV=" << getCount(readyOV) << '\n';
@@ -104,7 +138,7 @@ public:
 
         cout << "\n--- Sample IDs ---\n";
         printFirstFew(pendingODG, "ODG pending");
-        printFirstFew(cookingOrders, "Cooking");
+        printFirstFewPri(cookingOrders, "Cooking");
         printFirstFew(readyOT, "Ready OT");
         printFirstFew(finishedOrders, "Finished");
     }
@@ -123,6 +157,8 @@ public:
                 if (chefPtr->is_finished()) {
                     Order* done = chefPtr->get_current_order();
                     string t = done->get_type();
+
+                    removeFromCooking(done->get_id());
 
                     if (t == "OT") readyOT.enqueue(done);
                     else if (t == "ODG" || t == "ODN") readyOD.enqueue(done);
@@ -160,7 +196,7 @@ public:
                     if (freeCS.dequeue(assigned)) {
                         assigned->assign_order(order);
                         busyChefs.enqueue(assigned);
-                        cookingOrders.enqueue(order);
+                        cookingOrders.enqueue(order, -order->get_size());
                     } else {
                         if (t == "ODG") pendingODG.enqueue(order);
                         else pendingOVG.enqueue(order, rand() % 10);
@@ -169,7 +205,7 @@ public:
                     if (freeCN.dequeue(assigned) || freeCS.dequeue(assigned)) {
                         assigned->assign_order(order);
                         busyChefs.enqueue(assigned);
-                        cookingOrders.enqueue(order);
+                        cookingOrders.enqueue(order, -order->get_size());
                     } else {
                         if (t == "ODN") pendingODN.enqueue(order);
                         else if (t == "OT") pendingOT.enqueue(order);
@@ -281,6 +317,35 @@ public:
         while (q.dequeue(item)) { ++count; temp.enqueue(item); }
         while (temp.dequeue(item)) q.enqueue(item);
         return count;
+    }
+
+    void removeFromCooking(int orderId) {
+        priQueue<Order*> temp;
+        Order* o; int p;
+        while (cookingOrders.dequeue(o, p)) {
+            if (o->get_id() != orderId)
+                temp.enqueue(o, p);
+        }
+        while (temp.dequeue(o, p))
+            cookingOrders.enqueue(o, p);
+    }
+
+    void printFirstFewPri(priQueue<Order*>& q, string name) {
+        cout << name << ": ";
+        priQueue<Order*> shown;
+        priQueue<Order*> rest;
+        Order* o = nullptr;
+        int p, count = 0;
+        while (count < 5 && q.dequeue(o, p)) {
+            cout << o->get_id() << " ";
+            shown.enqueue(o, p);
+            ++count;
+        }
+        while (q.dequeue(o, p)) rest.enqueue(o, p);
+        while (shown.dequeue(o, p)) q.enqueue(o, p);
+        while (rest.dequeue(o, p))  q.enqueue(o, p);
+        if (count == 0) cout << "(empty)";
+        cout << endl;
     }
 
     void printFirstFew(LinkedQueue<Order*>& q, string name) {

@@ -109,6 +109,9 @@ public:
     bool get_can_share() const { return can_share; }
     int get_distance() const { return distance; }
 
+    Order(const Order&) = delete;
+    Order& operator=(const Order&) = delete;
+
     //setters(mesh han3mel behom 7aga dlwa2ti)
     void set_assignment_time(int time) { assignment_time = time; }
     void set_ready_time(int time) { ready_time = time; }
