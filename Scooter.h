@@ -24,6 +24,8 @@ public:
         : id(id), speed(speed), Main_Dur(Main_Dur), Main_Ords(Main_Ords), totalDistanceTraveled(0),
         inMaintenance(false), maintenanceRemaining(0), ordersServed(0), isAvailable(true) { } 
 
+
+	//Copy Constructor & Assignment Operator are deleted to prevent copying of Scooter objects
     Scooter(const Scooter&) = delete;
     Scooter& operator=(const Scooter&) = delete;
 

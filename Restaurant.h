@@ -38,8 +38,10 @@ private:
     LinkedQueue<Chef*> freeCS;
     LinkedQueue<Chef*> busyChefs;
     //resources
-    LinkedQueue<Scooter*> freeScooters;
-    LinkedQueue<Table*> freeTables;
+    priQueue<Scooter*>    freeScooters;
+    priQueue<Scooter*>    backScooters;
+    LinkedQueue<Scooter*> maintScooters;
+    LinkedQueue<Table*>   freeTables;
 
     // order counters
     int finishedCount;
@@ -59,7 +61,7 @@ public:
 
         // create tables and scooters
         for (int i = 1; i <= 10; ++i) freeTables.enqueue(new Table(i, rand() % 5 + 2));
-        for (int i = 1; i <= 8; ++i) freeScooters.enqueue(new Scooter(i, 50, 8, 5));
+        for (int i = 1; i <= 8; ++i) freeScooters.enqueue(new Scooter(i, 50, 8, 5), 0);
 
         // generate orders
         RandomGenerator rng;
@@ -103,7 +105,9 @@ public:
 
         // resources
         Scooter* s;
-        while (freeScooters.dequeue(s)) delete s;
+        while (freeScooters.dequeue(s, p)) delete s;
+        while (backScooters.dequeue(s, p)) delete s;
+        while (maintScooters.dequeue(s))   delete s;
 
         Table* t;
         while (freeTables.dequeue(t)) delete t;
@@ -239,11 +243,12 @@ public:
 
             // delivery orders /  scooter
             Scooter* scooter = nullptr;
+            int sp = 0;
             while (readyOV.dequeue(ready)) {
-                if (freeScooters.dequeue(scooter)) {
+                if (freeScooters.dequeue(scooter, sp)) {
                     finishedOrders.enqueue(ready);
                     ++finishedCount;
-                    freeScooters.enqueue(scooter);
+                    freeScooters.enqueue(scooter, sp);
                 } else {
                     readyOV.enqueue(ready);
                     break;
@@ -310,12 +315,13 @@ public:
         return count;
     }
 
-    int getScooterCount(LinkedQueue<Scooter*>& q) {
+    int getScooterCount(priQueue<Scooter*>& q) {
         int count = 0;
         Scooter* item = nullptr;
-        LinkedQueue<Scooter*> temp;
-        while (q.dequeue(item)) { ++count; temp.enqueue(item); }
-        while (temp.dequeue(item)) q.enqueue(item);
+        int p;
+        priQueue<Scooter*> temp;
+        while (q.dequeue(item, p)) { ++count; temp.enqueue(item, p); }
+        while (temp.dequeue(item, p)) q.enqueue(item, p);
         return count;
     }
 

@@ -98,6 +98,7 @@ public:
         for (int i = 0; i < orderCount; i++) {
             if (orderIDs[i] == orderID) {
                 
+				//shifting with complexity O(n), I can use bag adt for less complexity
                 for (int j = i; j < orderCount - 1; j++) {
                     orderIDs[j] = orderIDs[j + 1];
                 }
