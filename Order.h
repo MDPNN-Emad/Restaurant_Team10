@@ -5,6 +5,8 @@
 #include <string>
 using namespace std;
 
+class Chef; 
+
 class Order {
 private:
     // Basic order information for all orders:
@@ -31,8 +33,10 @@ private:
     int order_duration;      
     bool can_share;          
 
-    // For Delivery orders (OVC, OVG, OVN) 
-    int distance;           
+    // For Delivery orders (OVC, OVG, OVN)
+    int distance;
+
+    Chef* assigned_chef;
 
 public:
     // Constructor for Dine in orders (ODG, ODN)
@@ -53,6 +57,7 @@ public:
         service_start_time = -1;
         finish_time = -1;
         distance = -1;
+        assigned_chef = nullptr;
     }
 
     // Constructor for Delivery orders (OVC, OVG, OVN)
@@ -73,6 +78,7 @@ public:
         seats = -1;
         order_duration = -1;
         can_share = false;
+        assigned_chef = nullptr;
     }
 
     // Constructor for Takeaway orders (OT)
@@ -92,9 +98,10 @@ public:
         order_duration = -1;
         can_share = false;
         distance = -1;
+        assigned_chef = nullptr;
     }
 
-    // getters 
+    // getters
     int get_id() const { return id; }
     string get_type() const { return type; }
     int get_request_time() const { return request_time; }
@@ -108,6 +115,8 @@ public:
     int get_order_duration() const { return order_duration; }
     bool get_can_share() const { return can_share; }
     int get_distance() const { return distance; }
+    Chef* get_assigned_chef() const { return assigned_chef; }
+    void set_assigned_chef(Chef* c) { assigned_chef = c; }
 
     Order(const Order&) = delete;
     Order& operator=(const Order&) = delete;

@@ -51,9 +51,11 @@ public:
         current_order = order;
         remaining_dishes = order->get_size();
         is_available = false;
+        order->set_assigned_chef(this);
     }
 
     void release_order() {
+        if (current_order) current_order->set_assigned_chef(nullptr);
         current_order = nullptr;
         remaining_dishes = 0;
         is_available = true;

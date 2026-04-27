@@ -70,7 +70,6 @@ public:
         priQueue<Order*>&      pendingOVG,
         LinkedQueue<Chef*>&    freeCN,
         LinkedQueue<Chef*>&    freeCS,
-        LinkedQueue<Chef*>&    busyChefs,
         priQueue<Order*>&      cookingOrders,
         LinkedQueue<Order*>&   readyOD,
         LinkedQueue<Order*>&   readyOT,
@@ -95,8 +94,7 @@ public:
              << " | OVG: " << pendingOVG.getCount() << '\n';
 
         cout << "\nChefs: Free CN=" << freeCN.getCount()
-             << " | Free CS=" << freeCS.getCount()
-             << " | Busy=" << busyChefs.getCount() << '\n';
+             << " | Free CS=" << freeCS.getCount() << '\n';
 
         cout << "Cooking Orders: " << cookingOrders.getCount() << '\n';
         cout << "Ready: OD=" << readyOD.getCount()

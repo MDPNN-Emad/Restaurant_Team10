@@ -1,0 +1,1034 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
+
+PS D:\Senior Spring\Team10> claude
+╭─── Claude Code v2.1.119 ─────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                    │ Tips for getting started                                        │
+│                 Welcome back Hamo!                 │ Run /init to create a CLAUDE.md file with instructions for Cla… │
+│                                                    │ ─────────────────────────────────────────────────────────────── │
+│                       ▐▛███▜▌                      │ Recent activity                                                 │
+│                      ▝▜█████▛▘                     │ No recent activity                                              │
+│                        ▘▘ ▝▝                       │                                                                 │
+│  Sonnet 4.6 · Claude Pro ·                         │                                                                 │
+│  ahmed.elbahrawi03@eng-st.cu.edu.eg's Organization │                                                                 │
+│               D:\Senior Spring\Team10              │                                                                 │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+❯ This is a C++ university project (Data Structures & Algorithms course). It simulates a restaurant order management
+  system. We're working on Phase 1.2 fixes only — no new Phase 2 logic yet.
+  The project uses custom DS classes from labs: LinkedQueue, priQueue, ArrayStack. STL is not allowed. No global
+  variables. No friendship except where the spec explicitly says it's okay (e.g. operator<<).
+  The spec rule: "SHARE, MOVE, Don't Copy" — all lists hold pointers, never object copies.
+  We will fix issues one by one. I'll tell you which issue to fix. Only touch the files relevant to that fix. Don't
+  refactor anything I didn't ask about. In UI.h, change the cookingOrders parameter type from LinkedQueue<Order*>& to
+  priQueue<Order*>& so it matches the CookOrds member in Restaurant.h (CookOrds inherits from priQueue). Also update
+  the printFirstFew(cookingOrders, "Cooking") call inside printStatus — since priQueue needs the priority overload, add
+   a printFirstFewPri private helper in UI.h mirroring the one already in Restaurant.h, and call that one for
+  cookingOrders.
+
+● Let me read the relevant files before making any changes.
+
+  Read 2 files (ctrl+o to expand)
+
+● Now I have a clear picture. I need to make three changes in UI.h:
+  1. Add a printFirstFewPri private helper mirroring Restaurant.h's version
+  2. Change the cookingOrders parameter type in printStatus to priQueue<Order*>&
+  3. Swap the printFirstFew(cookingOrders, "Cooking") call to printFirstFewPri
+
+● Update(UI.h)
+  ⎿  Added 21 lines
+      35          cout << endl;
+      36      }
+      37
+      38 +    void printFirstFewPri(priQueue<Order*>& q, const string& name) {
+      39 +        cout << name << ": ";
+      40 +        priQueue<Order*> shown;
+      41 +        priQueue<Order*> rest;
+      42 +        Order* o = nullptr;
+      43 +        int p, count = 0;
+      44 +
+      45 +        while (count < 5 && q.dequeue(o, p)) {
+      46 +            cout << o->get_id() << " ";
+      47 +            shown.enqueue(o, p);
+      48 +            ++count;
+      49 +        }
+      50 +        while (q.dequeue(o, p)) rest.enqueue(o, p);
+      51 +
+      52 +        while (shown.dequeue(o, p)) q.enqueue(o, p);
+      53 +        while (rest.dequeue(o, p))  q.enqueue(o, p);
+      54 +
+      55 +        if (count == 0) cout << "(empty)";
+      56 +        cout << endl;
+      57 +    }
+      58 +
+      59  public:
+      60      void printStatus(
+      61          int currentTime,
+
+● Update(UI.h)
+  ⎿  Added 1 line, removed 1 line
+      71          LinkedQueue<Chef*>&    freeCN,
+      72          LinkedQueue<Chef*>&    freeCS,
+      73          LinkedQueue<Chef*>&    busyChefs,
+      74 -        LinkedQueue<Order*>&   cookingOrders,
+      74 +        priQueue<Order*>&      cookingOrders,
+      75          LinkedQueue<Order*>&   readyOD,
+      76          LinkedQueue<Order*>&   readyOT,
+      77          LinkedQueue<Order*>&   readyOV,
+
+● Update(UI.h)
+  ⎿  Added 1 line, removed 1 line
+      108
+      109          cout << "\n--- Sample IDs ---\n";
+      110          printFirstFew(pendingODG,     "ODG pending");
+      111 -        printFirstFew(cookingOrders,  "Cooking");
+      111 +        printFirstFewPri(cookingOrders,  "Cooking");
+      112          printFirstFew(readyOT,        "Ready OT");
+      113          printFirstFew(finishedOrders, "Finished");
+      114      }
+
+● Three changes applied to UI.h:
+  - Added printFirstFewPri(priQueue<Order*>&, const string&) as a private helper — exact mirror of the one in
+  Restaurant.h
+  - Changed cookingOrders parameter in printStatus from LinkedQueue<Order*>& to priQueue<Order*>&
+  - Swapped printFirstFew(cookingOrders, "Cooking") → printFirstFewPri(cookingOrders, "Cooking")
+
+✻ Baked for 44s
+
+❯ In Restaurant_Team10.vcxproj and Restaurant_Team10.vcxproj.filters, replace the three stale ClInclude entries:
+  cheff.h → Chef.h, PendyOVC.h → PendOVC.h, Restuarant.h → Restaurant.h. Keep all other entries unchanged.
+
+● Let me read both files first.
+
+  Read 2 files (ctrl+o to expand)
+
+● Six replacements needed — three per file. Making all six in parallel.
+
+● Update(Restaurant_Team10.vcxproj)
+  ⎿  Added 1 line, removed 1 line
+      131    </ItemGroup>
+      132    <ItemGroup>
+      133      <ClInclude Include="ArrayStack.h" />
+      134 -    <ClInclude Include="cheff.h" />
+      134 +    <ClInclude Include="Chef.h" />
+      135      <ClInclude Include="CookOrds.h" />
+      136      <ClInclude Include="LinkedQueue.h" />
+      137      <ClInclude Include="Node.h" />
+
+● Update(Restaurant_Team10.vcxproj.filters)
+  ⎿  Added 1 line, removed 1 line
+      23      <ClInclude Include="StackADT.h">
+      24        <Filter>Header Files</Filter>
+      25      </ClInclude>
+      26 -    <ClInclude Include="cheff.h">
+      26 +    <ClInclude Include="Chef.h">
+      27        <Filter>Header Files</Filter>
+      28      </ClInclude>
+      29      <ClInclude Include="Order.h">
+
+● Update(Restaurant_Team10.vcxproj)
+  ⎿  Added 1 line, removed 1 line
+      136      <ClInclude Include="LinkedQueue.h" />
+      137      <ClInclude Include="Node.h" />
+      138      <ClInclude Include="Order.h" />
+      139 -    <ClInclude Include="PendyOVC.h" />
+      139 +    <ClInclude Include="PendOVC.h" />
+      140      <ClInclude Include="priNode.h" />
+      141      <ClInclude Include="priQueue.h" />
+      142      <ClInclude Include="QueueADT.h" />
+
+● Update(Restaurant_Team10.vcxproj.filters)
+  ⎿  Added 1 line, removed 1 line
+      65      <ClInclude Include="CookOrds.h">
+      66        <Filter>Header Files</Filter>
+      67      </ClInclude>
+      68 -    <ClInclude Include="PendyOVC.h">
+      68 +    <ClInclude Include="PendOVC.h">
+      69        <Filter>Header Files</Filter>
+      70      </ClInclude>
+      71      <ClInclude Include="RdyOV.h">
+
+● Update(Restaurant_Team10.vcxproj)
+  ⎿  Added 1 line, removed 1 line
+      142      <ClInclude Include="QueueADT.h" />
+      143      <ClInclude Include="random_generator.h" />
+      144      <ClInclude Include="RdyOV.h" />
+      145 -    <ClInclude Include="Restuarant.h" />
+      145 +    <ClInclude Include="Restaurant.h" />
+      146      <ClInclude Include="Scooter.h" />
+      147      <ClInclude Include="StackADT.h" />
+      148      <ClInclude Include="Table.h" />
+
+● Update(Restaurant_Team10.vcxproj.filters)
+  ⎿  Added 1 line, removed 1 line
+      59      <ClInclude Include="UI.h">
+      60        <Filter>Header Files</Filter>
+      61      </ClInclude>
+      62 -    <ClInclude Include="Restuarant.h">
+      62 +    <ClInclude Include="Restaurant.h">
+      63        <Filter>Header Files</Filter>
+      64      </ClInclude>
+      65      <ClInclude Include="CookOrds.h">
+
+● All six entries updated in both files: cheff.h → Chef.h, PendyOVC.h → PendOVC.h, Restuarant.h → Restaurant.h.
+  Everything else untouched.
+
+❯  Verify build (no code changes needed)
+
+  Don't edit anything. Just confirm by reading the files that all #include directives across the codebase reference
+  filenames that actually exist on disk. Report any mismatches.
+
+● Explore(Verify all #include references exist on disk)
+  ⎿  Done (5 tool uses · 23.0k tokens · 20s)
+  (ctrl+o to expand)
+
+● All 32 local includes checked. One recurring mismatch found:
+
+  PriQueue.h vs priQueue.h (capital P vs lowercase p)
+
+  ┌──────────────┬──────┬───────────────────────┬─────────────────┐
+  │     File     │ Line │      Written as       │ Actual filename │
+  ├──────────────┼──────┼───────────────────────┼─────────────────┤
+  │ CookOrds.h   │ 5    │ #include "PriQueue.h" │ priQueue.h      │
+  ├──────────────┼──────┼───────────────────────┼─────────────────┤
+  │ Restaurant.h │ 9    │ #include "PriQueue.h" │ priQueue.h      │
+  ├──────────────┼──────┼───────────────────────┼─────────────────┤
+  │ TableQueue.h │ 5    │ #include "PriQueue.h" │ priQueue.h      │
+  └──────────────┴──────┴───────────────────────┴─────────────────┘
+
+  Windows's filesystem is case-insensitive, so this builds locally without error. However, the MSVC compiler itself is
+  case-sensitive on include paths when using certain settings, and it would break on any Linux/GCC build. The three
+  files above should consistently use "priQueue.h" to match the file on disk. All other 29 includes are correct.
+
+✻ Brewed for 37s
+
+❯ change all of them to "priQueue.h" but don't change file name on disk
+
+● Reading all three files before editing.
+
+  Read 3 files (ctrl+o to expand)
+
+● All three confirmed. Editing in parallel.
+
+● Update(CookOrds.h)
+  ⎿  Added 1 line, removed 1 line
+      2  #ifndef COOK_ORDS_H
+      3  #define COOK_ORDS_H
+      4
+      5 -#include "PriQueue.h"
+      5 +#include "priQueue.h"
+      6  #include "Order.h"
+      7
+      8  class CookOrds : public priQueue<Order*> {
+
+● Update(Restaurant.h)
+  ⎿  Added 1 line, removed 1 line
+       6  #include "Scooter.h"
+       7  #include "Table.h"
+       8  #include "LinkedQueue.h"
+       9 -#include "PriQueue.h"
+       9 +#include "priQueue.h"
+      10  #include "CookOrds.h"
+      11  #include "random_generator.h"
+      12  #include <iostream>
+
+● Update(TableQueue.h)
+  ⎿  Added 1 line, removed 1 line
+      2  #ifndef TABLE_QUEUE_H
+      3  #define TABLE_QUEUE_H
+      4
+      5 -#include "PriQueue.h"
+      5 +#include "priQueue.h"
+      6  #include "Table.h"
+      7  #include "Order.h"
+      8
+
+● Done. All three #include "PriQueue.h" directives updated to #include "priQueue.h" in CookOrds.h, Restaurant.h, and
+  TableQueue.h. Disk filename unchanged.
+
+❯ Issue 12 — Add missing scooter lists and fix Free_Scooters type
+
+  The recommended DS table requires three scooter lists: Free_Scooters as priQueue (priority = total distance traveled,
+   ascending — so shortest-distance scooters are picked first), Back_Scooters as priQueue (priority = remaining
+  distance back to restaurant), and Maint_Scooters as LinkedQueue (FCFS since all maintenance durations are equal).
+  In Restaurant.h:
+
+  Change LinkedQueue<Scooter*> freeScooters; to priQueue<Scooter*> freeScooters;
+  Add priQueue<Scooter*> backScooters;
+  Add LinkedQueue<Scooter*> maintScooters;
+
+  Update the constructor: when seeding the 8 scooters, enqueue them with priority 0 (no distance traveled yet) into the
+   priQueue: freeScooters.enqueue(new Scooter(...), 0);
+  Update the destructor: add cleanup loops for the two new lists, and change the freeScooters loop to use the priQueue
+  dequeue signature freeScooters.dequeue(s, p).
+  Update the destructor's freeScooters loop and getScooterCount helper to use the priQueue API. Also update the random
+  simulation in simulate() where scooters are pulled out and put back — those calls currently use LinkedQueue
+  signatures and will break.
+
+● Let me read the full current state of Restaurant.h first.
+
+  Reading 1 file… (ctrl+o to expand)
+  ⎿  Restaurant.h
+
+✢ Whisking… (3s · ↑ 96 tokens)
+  ⎿  Tip: Continue your session in Claude Code Desktop with /desktop
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯ 
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  paste again to expand
+
+● Done. All three #include "PriQueue.h" directives updated to #include "priQueue.h" in CookOrds.h, Restaurant.h, and TableQueue.h. Disk filename
+  unchanged.
+
+❯ Issue 12 — Add missing scooter lists and fix Free_Scooters type
+
+  The recommended DS table requires three scooter lists: Free_Scooters as priQueue (priority = total distance traveled, ascending — so
+  shortest-distance scooters are picked first), Back_Scooters as priQueue (priority = remaining distance back to restaurant), and Maint_Scooters as
+   LinkedQueue (FCFS since all maintenance durations are equal).
+  In Restaurant.h:
+
+  Change LinkedQueue<Scooter*> freeScooters; to priQueue<Scooter*> freeScooters;
+  Add priQueue<Scooter*> backScooters;
+  Add LinkedQueue<Scooter*> maintScooters;
+
+  Update the constructor: when seeding the 8 scooters, enqueue them with priority 0 (no distance traveled yet) into the priQueue:
+  freeScooters.enqueue(new Scooter(...), 0);
+  Update the destructor: add cleanup loops for the two new lists, and change the freeScooters loop to use the priQueue dequeue signature
+  freeScooters.dequeue(s, p).
+  Update the destructor's freeScooters loop and getScooterCount helper to use the priQueue API. Also update the random simulation in simulate()
+  where scooters are pulled out and put back — those calls currently use LinkedQueue signatures and will break.
+
+● Let me read the full current state of Restaurant.h first.
+
+  Read 1 file (ctrl+o to expand)
+
+● Now I have a complete picture. Five targeted changes needed:
+  1. Member declarations — change freeScooters type, add backScooters and maintScooters
+  2. Constructor — add priority 0 to the scooter enqueue
+  3. Destructor — fix freeScooters loop signature, add two new cleanup loops
+  4. simulate() — add local sp, fix scooter dequeue/enqueue calls
+  5. getScooterCount helper — switch to priQueue API
+
+  Making all five edits now.
+
+● Update(Restaurant.h)
+  ⎿  Added 4 lines, removed 2 lines
+      38      LinkedQueue<Chef*> freeCS;
+      39      LinkedQueue<Chef*> busyChefs;
+      40      //resources
+      41 -    LinkedQueue<Scooter*> freeScooters;
+      42 -    LinkedQueue<Table*> freeTables;
+      41 +    priQueue<Scooter*>    freeScooters;
+      42 +    priQueue<Scooter*>    backScooters;
+      43 +    LinkedQueue<Scooter*> maintScooters;
+      44 +    LinkedQueue<Table*>   freeTables;
+      45
+      46      // order counters
+      47      int finishedCount;
+
+● Update(Restaurant.h)
+  ⎿  Added 1 line, removed 1 line
+      61
+      62          // create tables and scooters
+      63          for (int i = 1; i <= 10; ++i) freeTables.enqueue(new Table(i, rand() % 5 + 2));
+      64 -        for (int i = 1; i <= 8; ++i) freeScooters.enqueue(new Scooter(i, 50, 8, 5));
+      64 +        for (int i = 1; i <= 8; ++i) freeScooters.enqueue(new Scooter(i, 50, 8, 5), 0);
+      65
+      66          // generate orders
+      67          RandomGenerator rng;
+
+● Update(Restaurant.h)
+  ⎿  Added 3 lines, removed 1 line
+      105
+      106          // resources
+      107          Scooter* s;
+      108 -        while (freeScooters.dequeue(s)) delete s;
+      108 +        while (freeScooters.dequeue(s, p)) delete s;
+      109 +        while (backScooters.dequeue(s, p)) delete s;
+      110 +        while (maintScooters.dequeue(s))   delete s;
+      111
+      112          Table* t;
+      113          while (freeTables.dequeue(t)) delete t;
+
+● Update(Restaurant.h)
+  ⎿  Added 3 lines, removed 2 lines
+      243
+      244              // delivery orders /  scooter
+      245              Scooter* scooter = nullptr;
+      246 +            int sp = 0;
+      247              while (readyOV.dequeue(ready)) {
+      247 -                if (freeScooters.dequeue(scooter)) {
+      248 +                if (freeScooters.dequeue(scooter, sp)) {
+      249                      finishedOrders.enqueue(ready);
+      250                      ++finishedCount;
+      250 -                    freeScooters.enqueue(scooter);
+      251 +                    freeScooters.enqueue(scooter, sp);
+      252                  } else {
+      253                      readyOV.enqueue(ready);
+      254                      break;
+
+● Update(Restaurant.h)
+  ⎿  Added 5 lines, removed 4 lines
+      315          return count;
+      316      }
+      317
+      318 -    int getScooterCount(LinkedQueue<Scooter*>& q) {
+      318 +    int getScooterCount(priQueue<Scooter*>& q) {
+      319          int count = 0;
+      320          Scooter* item = nullptr;
+      321 -        LinkedQueue<Scooter*> temp;
+      322 -        while (q.dequeue(item)) { ++count; temp.enqueue(item); }
+      323 -        while (temp.dequeue(item)) q.enqueue(item);
+      321 +        int p;
+      322 +        priQueue<Scooter*> temp;
+      323 +        while (q.dequeue(item, p)) { ++count; temp.enqueue(item, p); }
+      324 +        while (temp.dequeue(item, p)) q.enqueue(item, p);
+      325          return count;
+      326      }
+      327
+
+● All five edits applied. Summary of every change made:
+
+  ┌─────────────────┬──────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │    Location     │                                              Change                                              │
+  ├─────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ Members         │ freeScooters: LinkedQueue → priQueue; added backScooters (priQueue), maintScooters (LinkedQueue) │
+  ├─────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ Constructor     │ freeScooters.enqueue(..., 0) — seeds with priority 0 (no distance traveled)                      │
+  ├─────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ Destructor      │ freeScooters.dequeue(s, p) + two new cleanup loops for backScooters and maintScooters            │
+  ├─────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ simulate()      │ Added int sp = 0;, freeScooters.dequeue(scooter, sp), freeScooters.enqueue(scooter, sp)          │
+  ├─────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ getScooterCount │ Signature and body switched to priQueue API                                                      │
+  └─────────────────┴──────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+✻ Crunched for 53s
+
+※ recap: Fixing Phase 1.2 structural issues in a C++ restaurant simulation. Just added the three scooter lists and updated all call sites. Next:
+  continue fixing remaining reported issues one by one. (disable recaps in /config)
+
+❯ Issue 12 — Use existing derived classes (PendOVC, RdyOV, CookOrds is done)
+
+  In Restaurant.h, replace LinkedQueue<Order*> pendingOVC; with PendOVC pendingOVC; and LinkedQueue<Order*> readyOV; with RdyOV readyOV;. Add
+  #include "PendOVC.h" and #include "RdyOV.h". Both classes inherit from LinkedQueue<Order*> so all existing call sites should keep working
+  unchanged.
+
+  Issue 13 — Convert Finished_orders to a stack
+
+  In Restaurant.h, change LinkedQueue<Order*> finishedOrders; to ArrayStack<Order*> finishedOrders; and add #include "ArrayStack.h". Update every
+  call site: enqueue → push, dequeue → pop. Update printFirstFew to handle a stack (or add a printFirstFewStack helper). Update the destructor to
+  use pop instead of dequeue.
+
+  Issue 14 — Add three table lists
+
+  In Restaurant.h, replace LinkedQueue<Table*> freeTables; with three TableQueue instances: TableQueue freeTables;, TableQueue busySharable;,
+  TableQueue busyNoShare;. Add #include "TableQueue.h". Update the constructor to enqueue tables into freeTables with priority = capacity (so
+  smallest tables sit at top for best-fit). Update destructor and getTableCount to use priQueue API.
+
+  Issue 15  — Add InServ_Orders
+
+  In Restaurant.h, add priQueue<Order*> inServiceOrders;. Add it to the destructor cleanup. Don't add any logic yet — Phase 2 will populate it when
+   an order leaves Ready and enters service.
+
+● Let me read Restaurant.h and all referenced headers before touching anything.
+
+  Read 5 files (ctrl+o to expand)
+
+● I have everything I need. Planning all changes across issues 12–15 before touching the file:
+
+  - #12: pendingOVC → PendOVC, readyOV → RdyOV; add two includes
+  - #13: finishedOrders → ArrayStack; enqueue→push, dequeue→pop; add printFirstFewStack; add #include "ArrayStack.h"
+  - #14: freeTables → three TableQueues; constructor seeds with priority=cap; destructor/helper use priQueue API; add #include "TableQueue.h"
+  - #15: add priQueue<Order*> inServiceOrders + destructor cleanup
+
+  Making all edits now.
+
+● Update(Restaurant.h)
+  ⎿  Added 4 lines
+       7  #include "Table.h"
+       8  #include "LinkedQueue.h"
+       9  #include "priQueue.h"
+      10 +#include "ArrayStack.h"
+      11  #include "CookOrds.h"
+      12 +#include "PendOVC.h"
+      13 +#include "RdyOV.h"
+      14 +#include "TableQueue.h"
+      15  #include "random_generator.h"
+      16  #include <iostream>
+      17  #include <cstdlib>
+
+● Update(Restaurant.h)
+  ⎿  Added 1 line, removed 1 line
+      25      LinkedQueue<Order*> pendingODN;
+      26      LinkedQueue<Order*> pendingOT;
+      27      LinkedQueue<Order*> pendingOVN;
+      28 -    LinkedQueue<Order*> pendingOVC;
+      28 +    PendOVC pendingOVC;
+      29      priQueue<Order*> pendingOVG;
+      30
+      31      // orders in progress / ready
+
+● Update(Restaurant.h)
+  ⎿  Added 1 line, removed 1 line
+      32      CookOrds cookingOrders;
+      33      LinkedQueue<Order*> readyOD; // dine-in
+      34      LinkedQueue<Order*> readyOT; // takeaway
+      35 -    LinkedQueue<Order*> readyOV; // delivery
+      35 +    RdyOV readyOV; // delivery
+      36
+      37      LinkedQueue<Order*> finishedOrders;
+      38      LinkedQueue<Order*> cancelledOrders;
+
+● Update(Restaurant.h)
+  ⎿  Added 2 lines, removed 1 line
+      34      LinkedQueue<Order*> readyOT; // takeaway
+      35      RdyOV readyOV; // delivery
+      36
+      37 -    LinkedQueue<Order*> finishedOrders;
+      37 +    ArrayStack<Order*>  finishedOrders;
+      38      LinkedQueue<Order*> cancelledOrders;
+      39 +    priQueue<Order*>    inServiceOrders;
+      40
+      41      // chefs
+      42      LinkedQueue<Chef*> freeCN;
+
+● Update(Restaurant.h)
+  ⎿  Added 3 lines, removed 1 line
+      46      priQueue<Scooter*>    freeScooters;
+      47      priQueue<Scooter*>    backScooters;
+      48      LinkedQueue<Scooter*> maintScooters;
+      49 -    LinkedQueue<Table*>   freeTables;
+      49 +    TableQueue freeTables;
+      50 +    TableQueue busySharable;
+      51 +    TableQueue busyNoShare;
+      52
+      53      // order counters
+      54      int finishedCount;
+
+● Update(Restaurant.h)
+  ⎿  Added 1 line, removed 1 line
+      67          for (int i = 11; i <= 15; ++i) freeCS.enqueue(new Chef(i, "CS", 5));
+      68
+      69          // create tables and scooters
+      70 -        for (int i = 1; i <= 10; ++i) freeTables.enqueue(new Table(i, rand() % 5 + 2));
+      70 +        for (int i = 1; i <= 10; ++i) { int cap = rand() % 5 + 2; freeTables.enqueue(new Table(i, cap), cap); }
+      71          for (int i = 1; i <= 8; ++i) freeScooters.enqueue(new Scooter(i, 50, 8, 5), 0);
+      72
+      73          // generate orders
+
+● Update(Restaurant.h)
+  ⎿  Added 3 lines, removed 2 lines
+      101          while (readyOD.dequeue(o))       delete o;
+      102          while (readyOT.dequeue(o))       delete o;
+      103          while (readyOV.dequeue(o))       delete o;
+      104 -        while (finishedOrders.dequeue(o))  delete o;
+      105 -        while (cancelledOrders.dequeue(o)) delete o;
+      104 +        while (finishedOrders.pop(o))         delete o;
+      105 +        while (inServiceOrders.dequeue(o, p)) delete o;
+      106 +        while (cancelledOrders.dequeue(o))    delete o;
+      107
+      108          // chefs
+      109          Chef* c;
+
+● Update(Restaurant.h)
+  ⎿  Added 3 lines, removed 1 line
+      118          while (maintScooters.dequeue(s))   delete s;
+      119
+      120          Table* t;
+      121 -        while (freeTables.dequeue(t)) delete t;
+      121 +        while (freeTables.dequeue(t, p))   delete t;
+      122 +        while (busySharable.dequeue(t, p)) delete t;
+      123 +        while (busyNoShare.dequeue(t, p))  delete t;
+      124      }
+      125
+      126      void printStatus() {
+
+● Update(Restaurant.h)
+  ⎿  Added 1 line, removed 1 line
+      154          printFirstFew(pendingODG, "ODG pending");
+      155          printFirstFewPri(cookingOrders, "Cooking");
+      156          printFirstFew(readyOT, "Ready OT");
+      157 -        printFirstFew(finishedOrders, "Finished");
+      157 +        printFirstFewStack(finishedOrders, "Finished");
+      158      }
+      159
+      160      void simulate() {
+
+● Update(Restaurant.h)
+  ⎿  Added 1 line, removed 1 line
+      234
+      235              // takeaway should finish immediately
+      236              while (readyOT.dequeue(ready)) {
+      237 -                finishedOrders.enqueue(ready);
+      237 +                finishedOrders.push(ready);
+      238                  ++finishedCount;
+      239              }
+      240
+
+● Update(Restaurant.h)
+  ⎿  Added 4 lines, removed 3 lines
+      240
+      241        // dine-in needs table assignment
+      242              Table* table = nullptr;
+      243 +            int tp = 0;
+      244              while (readyOD.dequeue(ready)) {
+      244 -                if (freeTables.dequeue(table)) {
+      245 -                    finishedOrders.enqueue(ready);
+      245 +                if (freeTables.dequeue(table, tp)) {
+      246 +                    finishedOrders.push(ready);
+      247                      ++finishedCount;
+      247 -                    freeTables.enqueue(table);
+      248 +                    freeTables.enqueue(table, tp);
+      249                  } else {
+      250                      readyOD.enqueue(ready);
+      251                      break;
+
+● Update(Restaurant.h)
+  ⎿  Added 1 line, removed 1 line
+      257              int sp = 0;
+      258              while (readyOV.dequeue(ready)) {
+      259                  if (freeScooters.dequeue(scooter, sp)) {
+      260 -                    finishedOrders.enqueue(ready);
+      260 +                    finishedOrders.push(ready);
+      261                      ++finishedCount;
+      262                      freeScooters.enqueue(scooter, sp);
+      263                  } else {
+
+● Update(Restaurant.h)
+  ⎿  Added 5 lines, removed 4 lines
+      317          return count;
+      318      }
+      319
+      320 -    int getTableCount(LinkedQueue<Table*>& q) {
+      320 +    int getTableCount(priQueue<Table*>& q) {
+      321          int count = 0;
+      322          Table* item = nullptr;
+      323 -        LinkedQueue<Table*> temp;
+      324 -        while (q.dequeue(item)) { ++count; temp.enqueue(item); }
+      325 -        while (temp.dequeue(item)) q.enqueue(item);
+      323 +        int p;
+      324 +        priQueue<Table*> temp;
+      325 +        while (q.dequeue(item, p)) { ++count; temp.enqueue(item, p); }
+      326 +        while (temp.dequeue(item, p)) q.enqueue(item, p);
+      327          return count;
+      328      }
+      329
+
+● Update(Restaurant.h)
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Edit file
+ Restaurant.h
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+ 348              cookingOrders.enqueue(o, p);
+ 349      }
+ 350
+ 351 +    void printFirstFewStack(ArrayStack<Order*>& s, string name) {
+ 352 +        cout << name << ": ";
+ 353 +        ArrayStack<Order*> shown;
+ 354 +        ArrayStack<Order*> rest;
+ 355 +        Order* o = nullptr;
+ 356 +        int count = 0;
+ 357 +        while (count < 5 && s.pop(o)) {
+ 358 +            cout << o->get_id() << " ";
+ 359 +            shown.push(o);
+ 360 +            ++count;
+ 361 +        }
+ 362 +        while (s.pop(o)) rest.push(o);
+ 363 +        while (rest.pop(o))  s.push(o);
+ 364 +        while (shown.pop(o)) s.push(o);
+ 365 +        if (count == 0) cout << "(empty)";
+ 366 +        cout << endl;
+ 367 +    }
+ 368 +
+ 369      void printFirstFewPri(priQueue<Order*>& q, string name) {
+ 370          cout << name << ": ";
+ 371          priQueue<Order*> shown;
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+ Do you want to make this edit to Restaurant.h?
+ ❯ 1. Yes
+   2. Yes, allow all edits during this session (shift+tab)
+   3. No
+
+ Esc to cancel · Tab to amend
+      260 +                    finishedOrders.push(ready);
+      261                      ++finishedCount;
+      262                      freeScooters.enqueue(scooter, sp);
+      263                  } else {
+
+● Update(Restaurant.h)
+  ⎿  Added 5 lines, removed 4 lines
+      317          return count;
+      318      }
+      319
+      320 -    int getTableCount(LinkedQueue<Table*>& q) {
+      320 +    int getTableCount(priQueue<Table*>& q) {
+      321          int count = 0;
+      322          Table* item = nullptr;
+      323 -        LinkedQueue<Table*> temp;
+      324 -        while (q.dequeue(item)) { ++count; temp.enqueue(item); }
+      325 -        while (temp.dequeue(item)) q.enqueue(item);
+      323 +        int p;
+      324 +        priQueue<Table*> temp;
+      325 +        while (q.dequeue(item, p)) { ++count; temp.enqueue(item, p); }
+      326 +        while (temp.dequeue(item, p)) q.enqueue(item, p);
+      327          return count;
+      328      }
+      329
+
+● Update(Restaurant.h)
+  ⎿  Added 18 lines
+      348              cookingOrders.enqueue(o, p);
+      349      }
+      350
+      351 +    void printFirstFewStack(ArrayStack<Order*>& s, string name) {
+      352 +        cout << name << ": ";
+      353 +        ArrayStack<Order*> shown;
+      354 +        ArrayStack<Order*> rest;
+      355 +        Order* o = nullptr;
+      356 +        int count = 0;
+      357 +        while (count < 5 && s.pop(o)) {
+      358 +            cout << o->get_id() << " ";
+      359 +            shown.push(o);
+      360 +            ++count;
+      361 +        }
+      362 +        while (s.pop(o)) rest.push(o);
+      363 +        while (rest.pop(o))  s.push(o);
+      364 +        while (shown.pop(o)) s.push(o);
+      365 +        if (count == 0) cout << "(empty)";
+      366 +        cout << endl;
+      367 +    }
+      368 +
+      369      void printFirstFewPri(priQueue<Order*>& q, string name) {
+      370          cout << name << ": ";
+      371          priQueue<Order*> shown;
+
+● Now let me do a final read to verify the whole file is consistent.
+
+  Read 1 file (ctrl+o to expand)
+
+● Everything looks correct. Summary of all changes made:
+
+  Issue 12 — pendingOVC → PendOVC, readyOV → RdyOV; added #include "PendOVC.h" and #include "RdyOV.h". All call sites unchanged (both inherit
+  LinkedQueue<Order*>).
+
+  Issue 13 — finishedOrders → ArrayStack<Order*>; added #include "ArrayStack.h". All three enqueue calls in simulate() → push, destructor → pop.
+  Added printFirstFewStack helper (pop to shown, drain rest to a second stack, restore rest then shown back — O(n) restore with correct LIFO order).
+   printStatus uses the new helper.
+
+  Issue 14 — freeTables → TableQueue freeTables / busySharable / busyNoShare; added #include "TableQueue.h". Constructor seeds freeTables with
+  priority = capacity. Destructor drains all three with dequeue(t, p). getTableCount now takes priQueue<Table*>&. simulate() dine-in loop uses
+  dequeue(table, tp) / enqueue(table, tp).
+
+  Issue 15 — Added priQueue<Order*> inServiceOrders member. Destructor drains it with dequeue(o, p). No simulation logic added yet.
+
+✻ Brewed for 2m 35s
+
+※ recap: Restaurant order-management simulation in C++, fixing struct/type issues across Phase 1.2. All four issues (12–15) are done; next step is
+  building the project to confirm it compiles clean. (disable recaps in /config)
+
+❯ Issue 17 — Add Action class hierarchy and ACTIONS_LIST
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯ 
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  ? for shortcuts
+      366 +        cout << endl;
+      367 +    }
+      368 +
+      369      void printFirstFewPri(priQueue<Order*>& q, string name) {
+      370          cout << name << ": ";
+      371          priQueue<Order*> shown;
+
+● Now let me do a final read to verify the whole file is consistent.
+
+  Read 1 file (ctrl+o to expand)
+
+● Everything looks correct. Summary of all changes made:
+
+  Issue 12 — pendingOVC → PendOVC, readyOV → RdyOV; added #include "PendOVC.h" and #include "RdyOV.h". All call sites unchanged (both inherit
+  LinkedQueue<Order*>).
+
+  Issue 13 — finishedOrders → ArrayStack<Order*>; added #include "ArrayStack.h". All three enqueue calls in simulate() → push, destructor → pop.
+  Added printFirstFewStack helper (pop to shown, drain rest to a second stack, restore rest then shown back — O(n) restore with correct LIFO order).
+   printStatus uses the new helper.
+
+  Issue 14 — freeTables → TableQueue freeTables / busySharable / busyNoShare; added #include "TableQueue.h". Constructor seeds freeTables with
+  priority = capacity. Destructor drains all three with dequeue(t, p). getTableCount now takes priQueue<Table*>&. simulate() dine-in loop uses
+  dequeue(table, tp) / enqueue(table, tp).
+
+  Issue 15 — Added priQueue<Order*> inServiceOrders member. Destructor drains it with dequeue(o, p). No simulation logic added yet.
+
+✻ Sautéed for 2m 35s
+
+※ recap: Restaurant order-management simulation in C++, fixing struct/type issues across Phase 1.2. All four issues (12–15) are done; next step is
+  building the project to confirm it compiles clean. (disable recaps in /config)
+
+❯ Issue 17 — Add Action class hierarchy and ACTIONS_LIST Create the Action class hierarchy required by the project spec (Appendix A). Three new
+  files:
+  1. Action.h — abstract base class:
+  cpp#ifndef ACTION_H
+  #define ACTION_H
+
+  class Restaurant;  // forward declaration
+
+  class Action {
+  protected:
+      int timestep;   // when this action fires
+  public:
+      Action(int t) : timestep(t) {}
+      int getTimestep() const { return timestep; }
+      virtual void Act(Restaurant* r) = 0;   // pure virtual — defined in derived classes
+      virtual ~Action() {}
+  };
+  #endif
+  2. RequestAction.h — derived class for order requests. Should store all the fields from a Q-line in the input file (TYP, TQ, ID, SIZE, Price, and
+   the type-specific fields: seats/duration/canShare for OD, distance for OV). Constructor takes all those fields. Act() body should be empty for
+  now (just // Phase 2: create order and add to pending list). Include guards REQUEST_ACTION_H.
+  3. CancelAction.h — derived class for X-lines. Stores int orderID. Constructor takes (int t, int id). Act() body empty for now (// Phase 2:
+  cancel the order). Include guards CANCEL_ACTION_H.
+  Then in Restaurant.h:
+
+  Add #include "Action.h" (the derived classes are not needed in Restaurant.h — they'll be included where actions are created)
+  Add member: LinkedQueue<Action*> actionsList;
+  Add actionsList to the destructor cleanup loop (while (actionsList.dequeue(a)) delete a; with Action* a;)
+
+  Add the three new files to Restaurant_Team10.vcxproj and .filters as ClInclude entries.
+  Do NOT implement any action logic — Act() bodies stay empty. This issue is about declaring the data structure so the project's DS layout matches
+  the TA's recommended table.
+
+● Let me read the vcxproj files to know exactly where to insert the new entries.
+
+  Read 2 files (ctrl+o to expand)
+
+● I have everything I need. Creating the three new files and updating Restaurant.h and both project files now.
+
+● Write(Action.h)
+  ⎿  Wrote 16 lines to Action.h
+       1 #ifndef ACTION_H
+       2 #define ACTION_H
+       3
+       4 class Restaurant;  // forward declaration
+       5
+       6 class Action {
+       7 protected:
+       8     int timestep;   // when this action fires
+       9 public:
+      10     Action(int t) : timestep(t) {}
+     … +6 lines (ctrl+o to expand)
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Create file
+ RequestAction.h
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+   1 #ifndef REQUEST_ACTION_H
+   2 #define REQUEST_ACTION_H
+   3
+   4 #include "Action.h"
+   5 #include <string>
+   4 #include "Action.h"
+   5 #include <string>
+   6 using namespace std;
+   7
+   8 class RequestAction : public Action {
+   9 private:
+  10     string typ;
+  11     int    id;
+  12     int    size;
+  13     double price;
+  14     // OD-specific
+  15     int    seats;
+  16     int    duration;
+  17     bool   canShare;
+  18     // OV-specific
+  19     int    distance;
+  20 public:
+  21     RequestAction(int t, string typ, int id, int size, double price,
+  22                   int seats, int duration, bool canShare, int distance)
+  23         : Action(t), typ(typ), id(id), size(size), price(price),
+  24           seats(seats), duration(duration), canShare(canShare), distance(distance)
+  25     {}
+  26
+  27     void Act(Restaurant* r) override {
+  28         // Phase 2: create order and add to pending list
+  29     }
+  30 };
+  31
+  32 #endif
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+ Do you want to create RequestAction.h?
+ ❯ 1. Yes
+   2. Yes, allow all edits during this session (shift+tab)
+   3. No
+
+ Esc to cancel · Tab to amend
+
+  Add the three new files to Restaurant_Team10.vcxproj and .filters as ClInclude entries.
+  Do NOT implement any action logic — Act() bodies stay empty. This issue is about declaring the data structure so the project's DS layout matches
+  the TA's recommended table.
+
+● Let me read the vcxproj files to know exactly where to insert the new entries.
+
+  Read 2 files (ctrl+o to expand)
+
+● I have everything I need. Creating the three new files and updating Restaurant.h and both project files now.
+
+● Write(Action.h)
+  ⎿  Wrote 16 lines to Action.h
+       1 #ifndef ACTION_H
+       2 #define ACTION_H
+       3
+       4 class Restaurant;  // forward declaration
+       5
+       6 class Action {
+       7 protected:
+       8     int timestep;   // when this action fires
+       9 public:
+      10     Action(int t) : timestep(t) {}
+     … +6 lines (ctrl+o to expand)
+
+● Write(RequestAction.h)
+  ⎿  Wrote 32 lines to RequestAction.h
+       1 #ifndef REQUEST_ACTION_H
+       2 #define REQUEST_ACTION_H
+       3
+       4 #include "Action.h"
+       5 #include <string>
+       6 using namespace std;
+       7
+       8 class RequestAction : public Action {
+       9 private:
+      10     string typ;
+     … +22 lines (ctrl+o to expand)
+
+● Write(CancelAction.h)
+  ⎿  Wrote 17 lines to CancelAction.h
+       1 #ifndef CANCEL_ACTION_H
+       2 #define CANCEL_ACTION_H
+       3
+       4 #include "Action.h"
+       5
+       6 class CancelAction : public Action {
+       7 private:
+       8     int orderID;
+       9 public:
+      10     CancelAction(int t, int id) : Action(t), orderID(id) {}
+     … +7 lines (ctrl+o to expand)
+
+● Now update Restaurant.h — include, member, and destructor.
+
+● Update(Restaurant.h)
+  ⎿  Added 1 line
+       7  #include "Table.h"
+       8  #include "LinkedQueue.h"
+       9  #include "priQueue.h"
+      10 +#include "Action.h"
+      11  #include "ArrayStack.h"
+      12  #include "CookOrds.h"
+      13  #include "PendOVC.h"
+
+● Update(Restaurant.h)
+  ⎿  Added 2 lines
+      57      int totalOrders;
+      58      int currentTime;
+      59
+      60 +    LinkedQueue<Action*> actionsList;
+      61 +
+      62  public:
+      63      Restaurant()
+      64          : finishedCount(0), cancelledCount(0), totalOrders(500), currentTime(0)
+
+● Update(Restaurant.h)
+  ⎿  Error editing file
+
+● Update(Restaurant.h)
+  ⎿  Added 2 lines
+      124          while (freeTables.dequeue(t, p))   delete t;
+      125          while (busySharable.dequeue(t, p)) delete t;
+      126          while (busyNoShare.dequeue(t, p))  delete t;
+      127 +
+      128 +        while (actionsList.dequeue(a)) delete a;
+      129      }
+      130
+      131      void printStatus() {
+
+● Two occurrences of that string — need more context to target only the destructor's line.
+
+● Update(Restaurant.h)
+  ⎿  Added 1 line
+      90
+      91      ~Restaurant() {
+      92          Order* o; int p;
+      93 +        Action* a;
+      94
+      95          // pending orders
+      96          while (pendingODG.dequeue(o))    delete o;
+
+● Now add the three entries to both project files.
+
+● Update(Restaurant_Team10.vcxproj)
+  ⎿  Added 1 line
+      130      <ClCompile Include="main.cpp" />
+      131    </ItemGroup>
+      132    <ItemGroup>
+      133 +    <ClInclude Include="Action.h" />
+      134      <ClInclude Include="ArrayStack.h" />
+      135      <ClInclude Include="Chef.h" />
+      136      <ClInclude Include="CookOrds.h" />
+
+● Update(Restaurant_Team10.vcxproj.filters)
+  ⎿  Added 9 lines
+      29      <ClInclude Include="Order.h">
+      30        <Filter>Header Files</Filter>
+      31      </ClInclude>
+      32 +    <ClInclude Include="Action.h">
+      33 +      <Filter>Header Files</Filter>
+      34 +    </ClInclude>
+      35 +    <ClInclude Include="RequestAction.h">
+      36 +      <Filter>Header Files</Filter>
+      37 +    </ClInclude>
+      38 +    <ClInclude Include="CancelAction.h">
+      39 +      <Filter>Header Files</Filter>
+      40 +    </ClInclude>
+      41      <ClInclude Include="ArrayStack.h">
+      42        <Filter>Header Files</Filter>
+      43      </ClInclude>
+
+● Update(Restaurant_Team10.vcxproj)
+  ⎿  Added 2 lines
+      143      <ClInclude Include="QueueADT.h" />
+      144      <ClInclude Include="random_generator.h" />
+      145      <ClInclude Include="RdyOV.h" />
+      146 +    <ClInclude Include="CancelAction.h" />
+      147 +    <ClInclude Include="RequestAction.h" />
+      148      <ClInclude Include="Restaurant.h" />
+      149      <ClInclude Include="Scooter.h" />
+      150      <ClInclude Include="StackADT.h" />
+
+● All done. Here's what was created/changed:
+
+  New files:
+  - Action.h — abstract base with timestep, getTimestep(), pure-virtual Act(Restaurant*), virtual destructor
+  - RequestAction.h — stores all Q-line fields (typ, id, size, price, seats, duration, canShare, distance); Act() body empty
+  - CancelAction.h — stores orderID; Act() body empty
+
+  Restaurant.h changes:
+  - Added #include "Action.h" after priQueue.h
+  - Added LinkedQueue<Action*> actionsList; after the counter members
+  - Destructor: declared Action* a; and added while (actionsList.dequeue(a)) delete a; at the end of cleanup
+
+  Project files: All three headers added as ClInclude entries in both .vcxproj and .vcxproj.filters.
+
+✻ Brewed for 1m 16s
+
+※ recap: Restaurant simulation Phase 1.2 structural fixes. Last session added the Action class hierarchy and wired actionsList into Restaurant.h.
+  Next: implement the input file parser to populate actionsList. (disable recaps in /config)
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯ 
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  ? for shortcuts
