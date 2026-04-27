@@ -130,6 +130,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Action.h" />
     <ClInclude Include="ArrayStack.h" />
     <ClInclude Include="Chef.h" />
     <ClInclude Include="CookOrds.h" />
@@ -142,6 +143,8 @@
     <ClInclude Include="QueueADT.h" />
     <ClInclude Include="random_generator.h" />
     <ClInclude Include="RdyOV.h" />
+    <ClInclude Include="CancelAction.h" />
+    <ClInclude Include="RequestAction.h" />
     <ClInclude Include="Restaurant.h" />
     <ClInclude Include="Scooter.h" />
     <ClInclude Include="StackADT.h" />

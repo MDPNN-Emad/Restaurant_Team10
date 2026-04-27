@@ -7,7 +7,12 @@
 #include "Table.h"
 #include "LinkedQueue.h"
 #include "priQueue.h"
+#include "Action.h"
+#include "ArrayStack.h"
 #include "CookOrds.h"
+#include "PendOVC.h"
+#include "RdyOV.h"
+#include "TableQueue.h"
 #include "random_generator.h"
 #include <iostream>
 #include <cstdlib>
@@ -21,17 +26,18 @@ private:
     LinkedQueue<Order*> pendingODN;
     LinkedQueue<Order*> pendingOT;
     LinkedQueue<Order*> pendingOVN;
-    LinkedQueue<Order*> pendingOVC;
+    PendOVC pendingOVC;
     priQueue<Order*> pendingOVG;
 
     // orders in progress / ready
     CookOrds cookingOrders;
     LinkedQueue<Order*> readyOD; // dine-in
     LinkedQueue<Order*> readyOT; // takeaway
-    LinkedQueue<Order*> readyOV; // delivery
+    RdyOV readyOV; // delivery
 
-    LinkedQueue<Order*> finishedOrders;
+    ArrayStack<Order*>  finishedOrders;
     LinkedQueue<Order*> cancelledOrders;
+    priQueue<Order*>    inServiceOrders;
 
     // chefs
     LinkedQueue<Chef*> freeCN;
@@ -41,13 +47,17 @@ private:
     priQueue<Scooter*>    freeScooters;
     priQueue<Scooter*>    backScooters;
     LinkedQueue<Scooter*> maintScooters;
-    LinkedQueue<Table*>   freeTables;
+    TableQueue freeTables;
+    TableQueue busySharable;
+    TableQueue busyNoShare;
 
     // order counters
     int finishedCount;
     int cancelledCount;
     int totalOrders;
     int currentTime;
+
+    LinkedQueue<Action*> actionsList;
 
 public:
     Restaurant()
@@ -60,7 +70,7 @@ public:
         for (int i = 11; i <= 15; ++i) freeCS.enqueue(new Chef(i, "CS", 5));
 
         // create tables and scooters
-        for (int i = 1; i <= 10; ++i) freeTables.enqueue(new Table(i, rand() % 5 + 2));
+        for (int i = 1; i <= 10; ++i) { int cap = rand() % 5 + 2; freeTables.enqueue(new Table(i, cap), cap); }
         for (int i = 1; i <= 8; ++i) freeScooters.enqueue(new Scooter(i, 50, 8, 5), 0);
 
         // generate orders
@@ -80,6 +90,7 @@ public:
 
     ~Restaurant() {
         Order* o; int p;
+        Action* a;
 
         // pending orders
         while (pendingODG.dequeue(o))    delete o;
@@ -94,8 +105,9 @@ public:
         while (readyOD.dequeue(o))       delete o;
         while (readyOT.dequeue(o))       delete o;
         while (readyOV.dequeue(o))       delete o;
-        while (finishedOrders.dequeue(o))  delete o;
-        while (cancelledOrders.dequeue(o)) delete o;
+        while (finishedOrders.pop(o))         delete o;
+        while (inServiceOrders.dequeue(o, p)) delete o;
+        while (cancelledOrders.dequeue(o))    delete o;
 
         // chefs
         Chef* c;
@@ -110,7 +122,11 @@ public:
         while (maintScooters.dequeue(s))   delete s;
 
         Table* t;
-        while (freeTables.dequeue(t)) delete t;
+        while (freeTables.dequeue(t, p))   delete t;
+        while (busySharable.dequeue(t, p)) delete t;
+        while (busyNoShare.dequeue(t, p))  delete t;
+
+        while (actionsList.dequeue(a)) delete a;
     }
 
     void printStatus() {
@@ -144,7 +160,7 @@ public:
         printFirstFew(pendingODG, "ODG pending");
         printFirstFewPri(cookingOrders, "Cooking");
         printFirstFew(readyOT, "Ready OT");
-        printFirstFew(finishedOrders, "Finished");
+        printFirstFewStack(finishedOrders, "Finished");
     }
 
     void simulate() {
@@ -224,17 +240,18 @@ public:
 
             // takeaway should finish immediately
             while (readyOT.dequeue(ready)) {
-                finishedOrders.enqueue(ready);
+                finishedOrders.push(ready);
                 ++finishedCount;
             }
 
 			// dine-in needs table assignment
             Table* table = nullptr;
+            int tp = 0;
             while (readyOD.dequeue(ready)) {
-                if (freeTables.dequeue(table)) {
-                    finishedOrders.enqueue(ready);
+                if (freeTables.dequeue(table, tp)) {
+                    finishedOrders.push(ready);
                     ++finishedCount;
-                    freeTables.enqueue(table);
+                    freeTables.enqueue(table, tp);
                 } else {
                     readyOD.enqueue(ready);
                     break;
@@ -246,7 +263,7 @@ public:
             int sp = 0;
             while (readyOV.dequeue(ready)) {
                 if (freeScooters.dequeue(scooter, sp)) {
-                    finishedOrders.enqueue(ready);
+                    finishedOrders.push(ready);
                     ++finishedCount;
                     freeScooters.enqueue(scooter, sp);
                 } else {
@@ -306,12 +323,13 @@ public:
         return count;
     }
 
-    int getTableCount(LinkedQueue<Table*>& q) {
+    int getTableCount(priQueue<Table*>& q) {
         int count = 0;
         Table* item = nullptr;
-        LinkedQueue<Table*> temp;
-        while (q.dequeue(item)) { ++count; temp.enqueue(item); }
-        while (temp.dequeue(item)) q.enqueue(item);
+        int p;
+        priQueue<Table*> temp;
+        while (q.dequeue(item, p)) { ++count; temp.enqueue(item, p); }
+        while (temp.dequeue(item, p)) q.enqueue(item, p);
         return count;
     }
 
@@ -334,6 +352,24 @@ public:
         }
         while (temp.dequeue(o, p))
             cookingOrders.enqueue(o, p);
+    }
+
+    void printFirstFewStack(ArrayStack<Order*>& s, string name) {
+        cout << name << ": ";
+        ArrayStack<Order*> shown;
+        ArrayStack<Order*> rest;
+        Order* o = nullptr;
+        int count = 0;
+        while (count < 5 && s.pop(o)) {
+            cout << o->get_id() << " ";
+            shown.push(o);
+            ++count;
+        }
+        while (s.pop(o)) rest.push(o);
+        while (rest.pop(o))  s.push(o);
+        while (shown.pop(o)) s.push(o);
+        if (count == 0) cout << "(empty)";
+        cout << endl;
     }
 
     void printFirstFewPri(priQueue<Order*>& q, string name) {

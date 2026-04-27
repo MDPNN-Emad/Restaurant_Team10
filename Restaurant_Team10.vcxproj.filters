@@ -29,6 +29,15 @@
     <ClInclude Include="Order.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Action.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RequestAction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CancelAction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="ArrayStack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
