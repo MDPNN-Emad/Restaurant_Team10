@@ -1,11 +1,17 @@
-﻿#include "Restaurant.h"
+#include "Restaurant.h"
+#include <iostream>
+using namespace std;
 
+// loader smoke test
 int main() {
+    Restaurant r;
+    if (!r.loadInputFile("test_input.txt")) {
+        cout << "Failed to open input file\n";
+        return 1;
+    }
 
-    cout << "     RESTAURANT SIMULATION for Phase 1.2\n";
+    r.printLoadDiagnostics();
 
-    Restaurant restaurant;
-    restaurant.simulate();
-
+    cin.get();
     return 0;
 }

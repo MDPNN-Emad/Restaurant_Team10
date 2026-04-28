@@ -1,13 +1,17 @@
 #include "Restaurant.h"
+#include "RequestAction.h"
+#include "CancelAction.h"
 #include "random_generator.h"
 #include <iostream>
+#include <fstream>
+#include <string>
 #include <cstdlib>
 #include <ctime>
 using namespace std;
 
 // Replaced by Restaurant::loadInputFile().
 Restaurant::Restaurant()
-    : finishedCount(0), cancelledCount(0), totalOrders(0), currentTime(0)
+    : finishedCount(0), cancelledCount(0), totalOrders(0), currentTime(0), TH(0)
 {
     /*
     srand(static_cast<unsigned int>(time(nullptr)));
@@ -207,4 +211,96 @@ void Restaurant::simulate()
     cout << "Finished orders: " << finishedCount << endl;
     cout << "Cancelled orders: " << cancelledCount << endl;
     */
+}
+
+int Restaurant::getTH() const { return TH; }
+void Restaurant::setTH(int t) { TH = t; }
+
+bool Restaurant::loadInputFile(string filename)
+{
+    ifstream fin(filename);
+    if (!fin.is_open()) return false;
+
+    int numCN;int numCS;int cnSpeed;int csSpeed;
+    fin >> numCN >> numCS >> cnSpeed >> csSpeed;
+
+    int scooterCount;int scooterSpeed;
+    fin >> scooterCount >> scooterSpeed;
+
+    int mainOrds;int mainDur;
+    fin >> mainOrds >> mainDur;
+
+    int tableCount;
+    fin >> tableCount;
+
+    int id = 1;
+    for (int i = 0; i < numCN; i++) {
+        freeCN.enqueue(new Chef(id, "CN", cnSpeed));
+        id++;
+    }
+        
+    for (int i = 0; i < numCS; i++) {
+        freeCS.enqueue(new Chef(id, "CS", csSpeed));
+        id++;
+    }
+        
+
+    for (int i = 1; i <= scooterCount; i++)
+		freeScooters.enqueue(new Scooter(i, scooterSpeed, mainDur, mainOrds), 0);//0=distance travelled priority
+
+    int tblId = 1;
+    int remaining = 0;
+    while (remaining < tableCount) {
+        int count;int cap;
+        fin >> count >> cap;
+        for (int i = 0; i < count; i++, tblId++)
+			freeTables.enqueue(new Table(tblId, cap), -cap); // -cap; to prioritize smaller tables // priQueue has larger priority value at head
+        remaining += count;
+    }
+
+    int th;int M;
+    fin >> th >> M;
+    setTH(th);
+
+	for (int i = 0; i < M; i++) { //read and classify according to type(no. of inputs), and enqueue in actionsList
+        string token;
+        fin >> token;
+        if (token == "Q") {
+            string typ;
+            fin >> typ;
+            int tq;int oid;int sz; double pr;
+            fin >> tq >> oid >> sz >> pr;
+            if (typ == "ODG" || typ == "ODN") {
+                int seats, dur;
+                char shareChar;
+                fin >> seats >> dur >> shareChar;
+                actionsList.enqueue(new RequestAction(tq, typ, oid, sz, pr, seats, dur, shareChar == 'Y'));
+            } else if (typ == "OVC" || typ == "OVG" || typ == "OVN") {
+                int dist;
+                fin >> dist;
+                actionsList.enqueue(new RequestAction(tq, typ, oid, sz, pr, dist));
+            } else { // OT
+                actionsList.enqueue(new RequestAction(tq, typ, oid, sz, pr));
+            }
+            totalOrders++;
+        } else { // X
+            int tCancel;int oid;
+            fin >> tCancel >> oid;
+            actionsList.enqueue(new CancelAction(tCancel, oid));
+        }
+    }
+
+    fin.close();
+    return true;
+}
+
+void Restaurant::printLoadDiagnostics()
+{
+    cout << "Free CN: "          << freeCN.getCount()        << "\n";
+    cout << "Free CS: "          << freeCS.getCount()        << "\n";
+    cout << "Free Scooters: "    << freeScooters.getCount()  << "\n";
+    cout << "Free Tables: "      << freeTables.getCount()    << "\n";
+    cout << "TH: "               << TH                       << "\n";
+    cout << "Actions in queue: " << actionsList.getCount()   << "\n";
+    cout << "Total Orders: "     << totalOrders              << "\n";
 }

@@ -11,17 +11,28 @@ private:
     int    id;
     int    size;
     double price;
-    // OD-specific
-    int    seats;
-    int    duration;
-    bool   canShare;
-    // OV-specific
-    int    distance;
+    int    seats     = -1;
+    int    duration  = -1;
+    bool   canShare  = false;
+    int    distance  = -1;
 public:
+    // dine-in (OD): (ODG, ODN)
     RequestAction(int t, string typ, int id, int size, double price,
-                  int seats, int duration, bool canShare, int distance)
+                  int seats, int duration, bool canShare)
         : Action(t), typ(typ), id(id), size(size), price(price),
-          seats(seats), duration(duration), canShare(canShare), distance(distance)
+          seats(seats), duration(duration), canShare(canShare)
+    {}
+
+    // delivery (OV): (OVC, OVG, OVN)
+    RequestAction(int t, string typ, int id, int size, double price,
+                  int distance)
+        : Action(t), typ(typ), id(id), size(size), price(price),
+          distance(distance)
+    {}
+
+    // takeaway (OT)
+    RequestAction(int t, string typ, int id, int size, double price)
+        : Action(t), typ(typ), id(id), size(size), price(price)
     {}
 
     string getTyp()      const { return typ; }

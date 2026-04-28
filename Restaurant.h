@@ -1,6 +1,7 @@
 #ifndef RESTAURANT_H
 #define RESTAURANT_H
 
+#include <string>
 #include "Order.h"
 #include "Chef.h"
 #include "Scooter.h"
@@ -51,6 +52,7 @@ private:
     int cancelledCount;
     int totalOrders;
     int currentTime;
+    int TH;
 
     LinkedQueue<Action*> actionsList;
 
@@ -59,6 +61,10 @@ public:
     ~Restaurant();
     void printStatus();
     void simulate();
+    int  getTH() const;
+    void setTH(int t);
+    bool loadInputFile(string filename);
+    void printLoadDiagnostics();
 };
 
 #endif
