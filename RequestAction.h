@@ -24,6 +24,15 @@ public:
           seats(seats), duration(duration), canShare(canShare), distance(distance)
     {}
 
+    string getTyp()      const { return typ; }
+    int    getId()       const { return id; }
+    int    getSize()     const { return size; }
+    double getPrice()    const { return price; }
+    int    getSeats()    const { return seats; }
+    int    getDuration() const { return duration; }
+    bool   getCanShare() const { return canShare; }
+    int    getDistance() const { return distance; }
+
     void Act(Restaurant* r) override {
         // Phase 2: create order and add to pending list
     }

@@ -9,6 +9,8 @@ private:
 public:
     CancelAction(int t, int id) : Action(t), orderID(id) {}
 
+    int getOrderID() const { return orderID; }
+
     void Act(Restaurant* r) override {
         // Phase 2: cancel the order
     }
