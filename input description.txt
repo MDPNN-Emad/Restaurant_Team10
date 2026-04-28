@@ -1,0 +1,32 @@
+Test Description for Restaurant Simulator Phase 2
+Team 10
+
+Each section below describes the scenario tested by the corresponding input file.
+
+input1.txt (50 actions) - Cancellation focus
+[2-3 sentences describing what this file tests]
+
+input2.txt (100 actions) - Balanced workload
+[2-3 sentences]
+
+input3.txt (148 actions) - Chef contention
+[2-3 sentences]
+
+input4.txt (193 actions) - Table contention
+[2-3 sentences]
+
+input5.txt (250 actions) - Scooter contention and maintenance
+[2-3 sentences]
+
+input6.txt (300 actions) - Comprehensive mix (PRIMARY TEST FILE)
+[2-3 sentences]
+Content for each section (use this material, but rewrite in plain prose — don't copy verbatim):
+
+input1.txt: Heavy on OVC orders with frequent cancellations across pending, cooking, and ready states. Tests that cancel actions correctly remove orders from any of the three lists where they might be, and that chefs are released when a cooking OVC is cancelled. Best file to verify cancellation logic in isolation.
+input2.txt: Even distribution across all six order types with occasional cancellations. Acts as a sanity check that the system handles every type correctly without any specific list being stressed. Useful baseline for catching regressions.
+input3.txt: Heavy on ODG and OVG orders, which both require CS chefs. With only 2 CS chefs configured, this forces the OVG priority queue to fill up and tests that the priority equation correctly orders waiting OVGs by price, size, and distance.
+input4.txt: Heavy on dine-in orders (ODG and ODN) with mixed CanShare flags. Tests best-fit table assignment, table sharing for shareable customers, and the movement of tables between Free, Busy_Sharable, and Busy_No_Share lists as orders complete.
+input5.txt: Heavy on delivery orders to keep all 4 scooters busy. With Main_Ords = 5, scooters are forced through several maintenance cycles. Tests that scooters move correctly between Free, Back, and Maintenance lists and that the priority queue assigns the scooter with shortest total distance first.
+input6.txt: Realistic mix of all six order types over 120 timesteps. Exercises every component of the system together — chef assignment, table assignment, scooter assignment, cancellations, maintenance cycling, and finished-order statistics. This is the primary test file for end-to-end verification.
+
+Final note at the end of the file: state explicitly that input6.txt is the file testing the most scenarios.

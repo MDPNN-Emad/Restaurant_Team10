@@ -41,12 +41,12 @@ public:
         return -1;  // Invalid index
     }
 
-    // Check if table is available at given time (seats & is not occupied beyond current time)
+    // is available? at given time (seats & is not occupied beyond current time)
     bool isAvailable(int currentTime) const {
         return (occupiedUntil <= currentTime) && (getFreeSeats() > 0);
     }
 
-    // Check if table can fit a given number of seats
+    // given number of seats
     bool canFit(int seats) const {
         return getFreeSeats() >= seats;
     }

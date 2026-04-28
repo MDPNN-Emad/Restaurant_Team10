@@ -53,8 +53,18 @@ private:
     int totalOrders;
     int currentTime;
     int TH;
+    int mode;
 
     LinkedQueue<Action*> actionsList;
+
+    void assignChefs();
+    int  computeOVGPriority(Order* o);
+    void checkCookingOrders();
+    void assignTables();
+    void checkTables();
+    void checkTakeaway();
+    void assignScooters();
+    void checkScooters();
 
 public:
     Restaurant();
@@ -63,8 +73,14 @@ public:
     void simulate();
     int  getTH() const;
     void setTH(int t);
+    int  getMode() const;
+    void setMode(int m);
     bool loadInputFile(string filename);
     void printLoadDiagnostics();
+    void addPendingOrder(Order* o);
+    void cancelOrder(int id);
+    void runSimulation();
+    bool writeOutputFile(string filename);
 };
 
 #endif

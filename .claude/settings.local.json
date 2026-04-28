@@ -4,7 +4,8 @@
       "Bash(git mv *)",
       "Bash(MSBuild Restaurant_Team10.vcxproj /p:Configuration=Debug /p:Platform=x64 /t:Build /v:minimal)",
       "Bash(cmd *)",
-      "PowerShell(& \"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\" \"D:\\\\Senior Spring\\\\Team10\\\\Restaurant_Team10.vcxproj\" /p:Configuration=Debug /p:Platform=x64 /t:Build /v:minimal 2>&1 | Select-Object -Last 20)"
+      "PowerShell(& \"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\" \"D:\\\\Senior Spring\\\\Team10\\\\Restaurant_Team10.vcxproj\" /p:Configuration=Debug /p:Platform=x64 /t:Build /v:minimal 2>&1 | Select-Object -Last 20)",
+      "PowerShell(py *)"
     ]
   }
 }

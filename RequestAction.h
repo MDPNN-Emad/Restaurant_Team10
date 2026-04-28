@@ -2,6 +2,7 @@
 #define REQUEST_ACTION_H
 
 #include "Action.h"
+#include "Restaurant.h"
 #include <string>
 using namespace std;
 
@@ -45,7 +46,14 @@ public:
     int    getDistance() const { return distance; }
 
     void Act(Restaurant* r) override {
-        // Phase 2: create order and add to pending list
+        Order* o = nullptr;
+        if (typ == "ODG" || typ == "ODN")
+            o = new Order(id, typ, timestep, size, price, seats, duration, canShare);
+        else if (typ == "OVC" || typ == "OVG" || typ == "OVN")
+            o = new Order(id, typ, timestep, size, price, distance);
+        else // OT
+            o = new Order(id, typ, timestep, size, price);
+        r->addPendingOrder(o);
     }
 };
 

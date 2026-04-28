@@ -2,6 +2,7 @@
 #define CANCEL_ACTION_H
 
 #include "Action.h"
+#include "Restaurant.h"
 
 class CancelAction : public Action {
 private:
@@ -12,7 +13,7 @@ public:
     int getOrderID() const { return orderID; }
 
     void Act(Restaurant* r) override {
-        // Phase 2: cancel the order
+        r->cancelOrder(orderID);
     }
 };
 

@@ -1,6 +1,7 @@
 #include "Restaurant.h"
 #include "RequestAction.h"
 #include "CancelAction.h"
+#include "UI.h"
 #include "random_generator.h"
 #include <iostream>
 #include <fstream>
@@ -9,9 +10,9 @@
 #include <ctime>
 using namespace std;
 
-// Replaced by Restaurant::loadInputFile().
+// Replaced by loadInputFile().
 Restaurant::Restaurant()
-    : finishedCount(0), cancelledCount(0), totalOrders(0), currentTime(0), TH(0)
+    : finishedCount(0), cancelledCount(0), totalOrders(0), currentTime(0), TH(0), mode(1)
 {
     /*
     srand(static_cast<unsigned int>(time(nullptr)));
@@ -52,7 +53,7 @@ Restaurant::~Restaurant() {
     while (pendingOVC.dequeue(o))    delete o;
     while (pendingOVG.dequeue(o, p)) delete o;
 
-    // in-flight and completed orders
+    // completed orders
     while (cookingOrders.dequeue(o, p)) delete o;
     while (readyOD.dequeue(o))          delete o;
     while (readyOT.dequeue(o))          delete o;
@@ -109,7 +110,7 @@ void Restaurant::printStatus()
     */
 }
 
-//Replaced by Restaurant::runSimulation().
+//Replaced by runSimulation().
 void Restaurant::simulate()
 {
     /*
@@ -303,4 +304,63 @@ void Restaurant::printLoadDiagnostics()
     cout << "TH: "               << TH                       << "\n";
     cout << "Actions in queue: " << actionsList.getCount()   << "\n";
     cout << "Total Orders: "     << totalOrders              << "\n";
+}
+
+int  Restaurant::getMode() const { return mode; }
+void Restaurant::setMode(int m)  { mode = m; }
+
+void Restaurant::addPendingOrder(Order* o)
+{
+    string t = o->get_type();
+    if      (t == "ODG") pendingODG.enqueue(o);
+    else if (t == "ODN") pendingODN.enqueue(o);
+    else if (t == "OT")  pendingOT.enqueue(o);
+    else if (t == "OVN") pendingOVN.enqueue(o);
+    else if (t == "OVC") pendingOVC.enqueue(o);
+    else if (t == "OVG") pendingOVG.enqueue(o, computeOVGPriority(o));
+}
+
+void Restaurant::cancelOrder(int id) {}
+
+int Restaurant::computeOVGPriority(Order* o) { return 0; }
+
+void Restaurant::assignChefs()        {}
+void Restaurant::checkCookingOrders() {}
+void Restaurant::assignTables()       {}
+void Restaurant::checkTables()        {}
+void Restaurant::checkTakeaway()      {}
+void Restaurant::assignScooters()     {}
+void Restaurant::checkScooters()      {}
+
+bool Restaurant::writeOutputFile(string filename) { return true; }
+
+void Restaurant::runSimulation()
+{
+    while ((finishedCount + cancelledCount) < totalOrders || !actionsList.isEmpty()) {
+        currentTime++;
+        if (currentTime > 20) break; // remove after Member 2/3 stubs are implemented
+
+        Action* front;
+        while (actionsList.peek(front) && front->getTimestep() == currentTime) {
+            actionsList.dequeue(front);
+            front->Act(this);
+            delete front;
+        }
+
+        checkCookingOrders();
+        checkScooters();
+        checkTables();
+        checkTakeaway();
+        assignChefs();
+        assignTables();
+        assignScooters();
+
+        if (mode == 1) {
+            // UI Here
+            cout << "TIME " << currentTime << "\n";
+        }
+    }
+
+    cout << "Simulation done\n";
+    cout << "Finished: " << finishedCount << " | Cancelled: " << cancelledCount << "\n";
 }
